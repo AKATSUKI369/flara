@@ -264,7 +264,7 @@ let userName = '';
 // Auth check
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) { window.location.href = '/login.html'; return; }
+  if (!session) { window.location.href = '/'; return; }
   userId = session.user.id;
   const namePart = session.user.user_metadata?.full_name?.split(' ')[0] || '';
   if (namePart) document.getElementById('nameInput').value = namePart;
