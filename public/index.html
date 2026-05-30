@@ -311,15 +311,18 @@ async function redirectUser(session) {
 }
 
 (async () => {
-  // Check if there's a token in the URL hash (OAuth callback)
-  if (window.location.hash && window.location.hash.includes('access_token')) {
-    const { data: { session }, error } = await sb.auth.getSession();
-    if (session) { await redirectUser(session); return; }
-  }
-
-  // Check existing session
+  // Wait for Supabase to process the hash token
+  await new Promise(r => setTimeout(r, 500));
+  
   const { data: { session } } = await sb.auth.getSession();
   if (session) { await redirectUser(session); return; }
+
+  // Listen for auth state change as fallback
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      await redirectUser(session);
+    }
+  });
 })();
 
 async function signInWithGoogle() {
