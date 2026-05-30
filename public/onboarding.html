@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flara — Let's get to know you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --p:#D4537E; --p50:#FBEAF0; --p100:#F4C0D1; --p600:#993556;
+    --t:#1D9E75; --t50:#E1F5EE; --t100:#9FE1CB;
+    --a50:#FAEEDA; --a100:#FAC775; --a800:#633806;
+    --ink:#1e1510; --ink2:#6b5f55; --ink3:#b0a49c;
+    --cream:#faf7f4; --white:#ffffff;
+    --card-shadow: 0 4px 40px rgba(30,21,16,.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 40px; }
+
+  .topbar { padding: 20px 24px 0; display: flex; align-items: center; gap: 12px; }
+  .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
+  .step-pills { display: flex; gap: 6px; margin-left: auto; }
+  .pill { width: 24px; height: 4px; border-radius: 99px; background: var(--p100); transition: background .3s; }
+  .pill.done { background: var(--p); }
+
+  .hero { padding: 32px 24px 0; }
+  .hero-step { font-size: 11px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+  .hero-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 300; color: var(--ink); line-height: 1.25; margin-bottom: 6px; }
+  .hero-title em { color: var(--p); font-style: italic; }
+  .hero-sub { font-size: 14px; color: var(--ink2); line-height: 1.6; }
+
+  .section { padding: 24px 24px 0; }
+
+  /* Name input */
+  .name-wrap { position: relative; }
+  .name-input {
+    width: 100%; padding: 16px 18px;
+    border: 1.5px solid var(--p100); border-radius: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500;
+    color: var(--ink); background: var(--white); outline: none;
+    transition: border-color .2s;
+  }
+  .name-input:focus { border-color: var(--p); }
+  .name-input::placeholder { color: var(--ink3); font-weight: 400; }
+  .name-label {
+    position: absolute; top: -10px; left: 14px;
+    font-size: 11px; font-weight: 500; color: var(--p);
+    background: var(--white); padding: 0 6px;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+
+  /* Condition cards */
+  .condition-grid { display: flex; flex-direction: column; gap: 10px; }
+  .cond-card {
+    background: var(--white);
+    border: 1.5px solid rgba(30,21,16,.08);
+    border-radius: 16px; padding: 16px 18px;
+    cursor: pointer; display: flex; align-items: center; gap: 14px;
+    transition: all .2s; position: relative; overflow: hidden;
+  }
+  .cond-card::before {
+    content: ''; position: absolute; inset: 0;
+    opacity: 0; transition: opacity .2s;
+  }
+  .cond-card.pink::before  { background: var(--p50); }
+  .cond-card.green::before { background: var(--t50); }
+  .cond-card.amber::before { background: var(--a50); }
+  .cond-card.gray::before  { background: #F1EFE8; }
+  .cond-card:hover::before { opacity: 1; }
+  .cond-card.selected { border-width: 2px; }
+  .cond-card.selected.pink  { border-color: var(--p);  background: var(--p50); }
+  .cond-card.selected.green { border-color: var(--t);  background: var(--t50); }
+  .cond-card.selected.amber { border-color: #BA7517; background: var(--a50); }
+  .cond-card.selected.gray  { border-color: #888780; background: #F1EFE8; }
+  .cond-icon { font-size: 28px; flex-shrink: 0; position: relative; z-index: 1; }
+  .cond-body { flex: 1; position: relative; z-index: 1; }
+  .cond-name { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .cond-desc { font-size: 12px; color: var(--ink2); line-height: 1.5; }
+  .cond-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid rgba(30,21,16,.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; position: relative; z-index: 1;
+    transition: all .2s;
+  }
+  .cond-card.selected .cond-check { background: var(--p); border-color: var(--p); }
+  .cond-card.selected.green .cond-check { background: var(--t); border-color: var(--t); }
+  .cond-card.selected.amber .cond-check { background: #BA7517; border-color: #BA7517; }
+  .cond-card.selected.gray  .cond-check { background: #5F5E5A; border-color: #5F5E5A; }
+  .check-tick { display: none; font-size: 12px; color: white; font-weight: 700; }
+  .cond-card.selected .check-tick { display: block; }
+
+  /* Cycle input */
+  .cycle-row { display: flex; align-items: center; gap: 14px; }
+  .cycle-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1.5px solid var(--p100); background: var(--white);
+    font-size: 22px; color: var(--p); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif; transition: background .15s; line-height: 1;
+  }
+  .cycle-btn:hover { background: var(--p50); }
+  .cycle-val { font-family: 'Fraunces', serif; font-size: 44px; font-weight: 300; color: var(--ink); min-width: 60px; text-align: center; }
+  .cycle-unit { font-size: 13px; color: var(--ink2); }
+  .cycle-note { font-size: 12px; color: var(--ink3); margin-top: 8px; line-height: 1.5; }
+
+  /* CTA */
+  .cta-wrap { padding: 28px 24px 0; }
+  .cta-btn {
+    width: 100%; padding: 16px;
+    background: var(--p); color: white; border: none;
+    border-radius: 14px; font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 500; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 4px 20px rgba(212,83,126,.3);
+    transition: all .2s;
+  }
+  .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(212,83,126,.4); }
+  .cta-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Screen management */
+  .screen { display: none; }
+  .screen.active { display: block; animation: slideIn .3s cubic-bezier(.4,0,.2,1); }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+  /* Loading */
+  .saving-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(250,247,244,.9); z-index: 100;
+    flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  }
+  .saving-overlay.show { display: flex; }
+  .spinner { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--p100); border-top-color: var(--p); animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .saving-text { font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; color: var(--ink2); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">flara</div>
+  <div class="step-pills">
+    <div class="pill done" id="pill1"></div>
+    <div class="pill done" id="pill2"></div>
+    <div class="pill" id="pill3"></div>
+  </div>
+</div>
+
+<!-- Screen 1: Name -->
+<div class="screen active" id="s1">
+  <div class="hero">
+    <div class="hero-step">Step 1 of 3</div>
+    <div class="hero-title">What should<br>we call <em>you?</em></div>
+    <div class="hero-sub">Just your first name — this is your private space.</div>
+  </div>
+  <div class="section">
+    <div class="name-wrap">
+      <div class="name-label">First name</div>
+      <input class="name-input" id="nameInput" type="text" placeholder="e.g. Priya" autocomplete="given-name" autofocus>
+    </div>
+  </div>
+  <div class="cta-wrap">
+    <button class="cta-btn" id="nameNextBtn" onclick="goToStep(2)">
+      Continue →
+    </button>
+  </div>
+</div>
+
+<!-- Screen 2: Condition -->
+<div class="screen" id="s2">
+  <div class="hero">
+    <div class="hero-step">Step 2 of 3</div>
+    <div class="hero-title">What are you<br><em>managing?</em></div>
+    <div class="hero-sub">Your AI insights are personalised to your condition.</div>
+  </div>
+  <div class="section">
+    <div class="condition-grid" id="condGrid">
+      <div class="cond-card pink" data-val="pcos" onclick="selectCond(this)">
+        <div class="cond-icon">🌸</div>
+        <div class="cond-body">
+          <div class="cond-name">PCOS</div>
+          <div class="cond-desc">Polycystic ovary syndrome — hormonal, metabolic, and cycle symptoms</div>
+        </div>
+        <div class="cond-check"><span class="check-tick">✓</span></div>
+      </div>
+      <div class="cond-card green" data-val="endo" onclick="selectCond(this)">
+        <div class="cond-icon">🌿</div>
+        <div class="cond-body">
+          <div class="cond-name">Endometriosis</div>
+          <div class="cond-desc">Pain, inflammation, and cycle-linked symptoms throughout the month</div>
+        </div>
+        <div class="cond-check"><span class="check-tick">✓</span></div>
+      </div>
+      <div class="cond-card amber" data-val="fibro" onclick="selectCond(this)">
+        <div class="cond-icon">⚡</div>
+        <div class="cond-body">
+          <div class="cond-name">Fibromyalgia</div>
+          <div class="cond-desc">Widespread pain, fatigue, brain fog, and sleep disruption</div>
+        </div>
+        <div class="cond-check"><span class="check-tick">✓</span></div>
+      </div>
+      <div class="cond-card gray" data-val="other" onclick="selectCond(this)">
+        <div class="cond-icon">💙</div>
+        <div class="cond-body">
+          <div class="cond-name">Other / Not sure yet</div>
+          <div class="cond-desc">Still figuring it out — Flara works for any chronic condition</div>
+        </div>
+        <div class="cond-check"><span class="check-tick">✓</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="cta-wrap">
+    <button class="cta-btn" id="condNextBtn" onclick="goToStep(3)" disabled>
+      Continue →
+    </button>
+  </div>
+</div>
+
+<!-- Screen 3: Cycle length -->
+<div class="screen" id="s3">
+  <div class="hero">
+    <div class="hero-step">Step 3 of 3</div>
+    <div class="hero-title">Your average<br><em>cycle length?</em></div>
+    <div class="hero-sub">This helps us predict your phases. You can change this anytime.</div>
+  </div>
+  <div class="section">
+    <div class="cycle-row">
+      <button class="cycle-btn" id="cycleM">−</button>
+      <div>
+        <div class="cycle-val" id="cycleVal">28</div>
+        <div class="cycle-unit" style="text-align:center">days</div>
+      </div>
+      <button class="cycle-btn" id="cycleP">+</button>
+    </div>
+    <div class="cycle-note">Average is 28 days. Anywhere from 21–35 is normal. With PCOS, irregular cycles are common — just pick your best guess.</div>
+  </div>
+  <div class="cta-wrap">
+    <button class="cta-btn" id="saveBtn" onclick="saveProfile()">
+      Start tracking with Flara 🌸
+    </button>
+  </div>
+</div>
+
+<div class="saving-overlay" id="savingOverlay">
+  <div class="spinner"></div>
+  <div class="saving-text">Setting up your profile…</div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────
+const SUPABASE_URL = 'https://your-project.supabase.co';
+const SUPABASE_KEY = 'your-anon-key-here';
+// ────────────────────────────────────────────────────
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentStep = 1;
+let selectedCond = null;
+let cycleLen = 28;
+let userId = null;
+let userName = '';
+
+// Auth check
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = '/login.html'; return; }
+  userId = session.user.id;
+  const namePart = session.user.user_metadata?.full_name?.split(' ')[0] || '';
+  if (namePart) document.getElementById('nameInput').value = namePart;
+})();
+
+function goToStep(step) {
+  if (step === 2) {
+    userName = document.getElementById('nameInput').value.trim();
+    if (!userName) {
+      document.getElementById('nameInput').focus();
+      document.getElementById('nameInput').style.borderColor = '#E24B4A';
+      return;
+    }
+  }
+  document.getElementById('s' + currentStep).classList.remove('active');
+  currentStep = step;
+  document.getElementById('s' + currentStep).classList.add('active');
+  document.getElementById('pill' + currentStep).classList.add('done');
+}
+
+function selectCond(el) {
+  document.querySelectorAll('.cond-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCond = el.dataset.val;
+  document.getElementById('condNextBtn').disabled = false;
+}
+
+// Cycle stepper
+document.getElementById('cycleM').addEventListener('click', () => {
+  cycleLen = Math.max(21, cycleLen - 1);
+  document.getElementById('cycleVal').textContent = cycleLen;
+});
+document.getElementById('cycleP').addEventListener('click', () => {
+  cycleLen = Math.min(45, cycleLen + 1);
+  document.getElementById('cycleVal').textContent = cycleLen;
+});
+
+// Name input enter key
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') goToStep(2);
+});
+document.getElementById('nameInput').addEventListener('input', function() {
+  this.style.borderColor = '';
+});
+
+async function saveProfile() {
+  document.getElementById('savingOverlay').classList.add('show');
+  try {
+    const { error } = await sb.from('profiles').upsert({
+      id: userId,
+      name: userName,
+      condition: selectedCond,
+      cycle_length: cycleLen
+    });
+    if (error) throw error;
+    window.location.href = '/dashboard.html';
+  } catch (e) {
+    document.getElementById('savingOverlay').classList.remove('show');
+    alert('Something went wrong — please try again.');
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>
