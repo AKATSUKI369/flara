@@ -298,24 +298,29 @@ const SUPABASE_KEY = 'your-anon-key-here';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Handle auth callback and check session
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (session) {
-    try {
-      const { data: profile } = await sb.from('profiles')
-        .select('condition')
-        .eq('id', session.user.id)
-        .single();
-      if (profile?.condition) {
-        window.location.href = '/dashboard';
-      } else {
-        window.location.href = '/onboarding';
-      }
-    } catch(e) {
-      window.location.href = '/onboarding';
-    }
+async function redirectUser(session) {
+  try {
+    const { data: profile } = await sb.from('profiles')
+      .select('condition')
+      .eq('id', session.user.id)
+      .single();
+    window.location.href = profile?.condition ? '/dashboard' : '/onboarding';
+  } catch(e) {
+    window.location.href = '/onboarding';
   }
-});
+}
+
+(async () => {
+  // Check if there's a token in the URL hash (OAuth callback)
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    const { data: { session }, error } = await sb.auth.getSession();
+    if (session) { await redirectUser(session); return; }
+  }
+
+  // Check existing session
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { await redirectUser(session); return; }
+})();
 
 async function signInWithGoogle() {
   const btn = document.getElementById('googleBtn');
