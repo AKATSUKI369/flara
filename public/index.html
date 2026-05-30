@@ -294,9 +294,29 @@
 
 <script>
 const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
+const SUPABASE_KEY = 'your-anon-key-here';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Handle auth callback and check session
+(async () => {
+  try {
+    // This handles the OAuth callback token in the URL
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const { data: profile } = await sb.from('profiles')
+        .select('condition')
+        .eq('id', session.user.id)
+        .single();
+      if (profile?.condition) {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/onboarding';
+      }
+      return;
+    }
+  } catch(e) {}
+})();
 
 async function signInWithGoogle() {
   const btn = document.getElementById('googleBtn');
@@ -313,11 +333,11 @@ async function signInWithGoogle() {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://flara-taupe.vercel.app/onboarding'
+        redirectTo: 'https://flara-taupe.vercel.app'
       }
     });
     if (error) throw error;
-  } catch (e) {
+  } catch(e) {
     loading.classList.remove('show');
     form.style.opacity = '1';
     btn.disabled = false;
