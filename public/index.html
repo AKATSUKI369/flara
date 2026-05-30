@@ -293,10 +293,8 @@
 </main>
 
 <script>
-// ── CONFIG — replace with your values ────────────────
 const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
-// ─────────────────────────────────────────────────────
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -315,7 +313,7 @@ async function signInWithGoogle() {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/onboarding'
+        redirectTo: 'https://flara-taupe.vercel.app/onboarding'
       }
     });
     if (error) throw error;
@@ -328,20 +326,6 @@ async function signInWithGoogle() {
     console.error(e);
   }
 }
-
-// If user already logged in, skip to dashboard
-(async () => {
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      const { data: profile } = await sb.from('profiles')
-        .select('condition')
-        .eq('id', session.user.id)
-        .single();
-      window.location.href = profile?.condition ? '/dashboard.html' : '/onboarding.html';
-    }
-  } catch(e) {}
-})();
 </script>
 </body>
 </html>
