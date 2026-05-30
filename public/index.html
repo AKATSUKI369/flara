@@ -299,11 +299,9 @@ const SUPABASE_KEY = 'your-anon-key-here';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Handle auth callback and check session
-(async () => {
-  try {
-    // This handles the OAuth callback token in the URL
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session) {
+    try {
       const { data: profile } = await sb.from('profiles')
         .select('condition')
         .eq('id', session.user.id)
@@ -313,10 +311,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       } else {
         window.location.href = '/onboarding';
       }
-      return;
+    } catch(e) {
+      window.location.href = '/onboarding';
     }
-  } catch(e) {}
-})();
+  }
+});
 
 async function signInWithGoogle() {
   const btn = document.getElementById('googleBtn');
