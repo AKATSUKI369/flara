@@ -103,6 +103,8 @@
   /* Signout */
   .signout-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink3); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px; }
   .signout-btn:hover { color: var(--p); }
+
+  #toast.show { transform: translateX(-50%) translateY(0) !important; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
@@ -175,11 +177,23 @@
 </div>
 
 <nav class="bottom-nav">
-  <button class="nav-item active"><i class="ti ti-home"></i>Home</button>
-  <button class="nav-item" onclick="goToLog()"><i class="ti ti-chart-line"></i>Trends</button>
-  <div class="nav-fab-wrap"><button class="nav-fab" onclick="goToLog()"><i class="ti ti-plus"></i></button></div>
-  <button class="nav-item"><i class="ti ti-users"></i>Community</button>
-  <button class="nav-item"><i class="ti ti-user"></i>Profile</button>
+  <button class="nav-item active" onclick="window.location.href='/dashboard'">
+    <i class="ti ti-home"></i>Home
+  </button>
+  <button class="nav-item" onclick="soon()">
+    <i class="ti ti-chart-line"></i>Trends
+  </button>
+  <div class="nav-fab-wrap">
+    <button class="nav-fab" onclick="window.location.href='/log'">
+      <i class="ti ti-plus"></i>
+    </button>
+  </div>
+  <button class="nav-item" onclick="soon()">
+    <i class="ti ti-users"></i>Community
+  </button>
+  <button class="nav-item" onclick="soon()">
+    <i class="ti ti-user"></i>Profile
+  </button>
 </nav>
 
 <script>
@@ -383,7 +397,20 @@ async function loadDashboard() {
   showInsight(safelogs);
 }
 
+function soon() {
+  const t = document.getElementById('toast');
+  t.textContent = 'Coming soon 🌸';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
 loadDashboard();
 </script>
+<div id="toast" style="position:fixed;bottom:90px;
+ left:50%;transform:translateX(-50%) translateY(40px)
+ ;background:#1e1510;color:#fff;padding:10px 20px;border-radius:99px;
+ font-size:13px;font-weight:500;transition:transform .3s;pointer-events:none;
+ white-space:nowrap" id="toast">
+</div>
 </body>
 </html>
