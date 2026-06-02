@@ -294,11 +294,17 @@ document.getElementById('insSubDate').textContent =
   // Check already logged today
   const today = now.toISOString().split('T')[0];
   const { data: existing } = await sb.from('symptom_logs')
-    .select('id').eq('user_id', userId).eq('log_date', today).single();
+    .select('*').eq('user_id', userId).eq('log_date', today).single();
   if (existing) {
-    document.getElementById('insTitle').textContent = 'Already logged today ✓';
-    showInsightScreen({ alreadyLogged: true });
-  }
+  document.getElementById('insTitle').textContent = 'Already logged today ✓';
+  document.getElementById('rPain').textContent = existing.pain_level + '/10';
+  document.getElementById('rEnergy').textContent = existing.energy_level + '/10';
+  document.getElementById('rSleep').textContent = existing.sleep_hours + 'h';
+  document.getElementById('rCycle').textContent = existing.cycle_day ? 'Day ' + existing.cycle_day : '—';
+  document.getElementById('insLoading').style.display = 'none';
+  document.getElementById('insTxt').textContent = existing.ai_insight || 'Come back tomorrow 🌸';
+  showInsightScreen({ alreadyLogged: true });
+}
 })();
 
 // Pain colors
@@ -463,22 +469,20 @@ Today's data:
 Respond with only the insight text. No labels, no formatting.`;
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 180,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
-      const data = await res.json();
-      const insight = data.content?.[0]?.text?.trim() || fallbackInsight();
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': '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'
+  },
+  body: JSON.stringify({
+    model: 'llama3-8b-8192',
+    max_tokens: 180,
+    messages: [{ role: 'user', content: prompt }]
+  })
+});
+const data = await res.json();
+const insight = data.choices?.[0]?.message?.content?.trim() || fallbackInsight();
 
       document.getElementById('insLoading').style.display = 'none';
       typeWrite(insight, document.getElementById('insTxt'));
