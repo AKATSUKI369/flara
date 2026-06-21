@@ -202,72 +202,123 @@ function generatePDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       const pageW = doc.internal.pageSize.getWidth();
-      let y = 20;
+      const margin = 20;
+      let y = 0;
 
-      // Header
+      // Header band
+      doc.setFillColor(212, 83, 126);
+      doc.rect(0, 0, pageW, 38, 'F');
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(22);
-      doc.setTextColor(212, 83, 126);
-      doc.text('flara', 20, y);
-      y += 8;
+      doc.setFontSize(20);
+      doc.setTextColor(255, 255, 255);
+      doc.text('flara', margin, 20);
+      doc.setFontSize(9);
+      doc.setTextColor(250, 220, 230);
+      doc.text('SYMPTOM TRACKING REPORT', margin, 28);
+
+      doc.setFontSize(8.5);
+      doc.setTextColor(250, 220, 230);
+      doc.text('GENERATED', pageW - margin - 38, 20);
       doc.setFontSize(10);
-      doc.setTextColor(110, 100, 90);
-      doc.text('Symptom Tracking Report', 20, y);
-      y += 14;
+      doc.setTextColor(255, 255, 255);
+      doc.text(new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }), pageW - margin - 38, 26);
+
+      y = 52;
 
       // Patient info box
-      doc.setDrawColor(230, 220, 215);
+      doc.setDrawColor(235, 225, 220);
       doc.setFillColor(250, 247, 244);
-      doc.roundedRect(20, y, pageW - 40, 26, 2, 2, 'FD');
-      doc.setFontSize(9);
-      doc.setTextColor(150, 140, 130);
-      doc.text('PATIENT', 26, y + 8);
-      doc.text('CONDITION', 26, y + 18);
+      doc.roundedRect(margin, y, pageW - margin * 2, 24, 2, 2, 'FD');
+      doc.setFontSize(8);
+      doc.setTextColor(160, 148, 138);
+      doc.text('PATIENT', margin + 6, y + 9);
+      doc.text('CONDITION', margin + 6, y + 18);
       doc.setFontSize(11);
       doc.setTextColor(30, 21, 16);
-      doc.text(userName || 'Flara User', 60, y + 8);
-      doc.text(conditionLabels[userCondition] || 'PCOS', 60, y + 18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(userName || 'Flara User', margin + 36, y + 9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(conditionLabels[userCondition] || 'PCOS', margin + 36, y + 18);
 
-      doc.setFontSize(9);
-      doc.setTextColor(150, 140, 130);
-      doc.text('PERIOD', pageW - 90, y + 8);
-      doc.text('GENERATED', pageW - 90, y + 18);
-      doc.setFontSize(11);
+      const midX = pageW / 2 + 10;
+      doc.setFontSize(8);
+      doc.setTextColor(160, 148, 138);
+      doc.text('REPORTING PERIOD', midX, y + 9);
+      doc.setFontSize(10);
       doc.setTextColor(30, 21, 16);
       const startDate = currentLogs[0]?.log_date || '';
       const endDate = currentLogs[currentLogs.length - 1]?.log_date || '';
-      doc.text(`${startDate} to ${endDate}`, pageW - 55, y + 8);
-      doc.text(new Date().toLocaleDateString(), pageW - 55, y + 18);
-      y += 38;
+      doc.text(`${startDate}  to  ${endDate}`, midX, y + 16);
+      doc.setFontSize(8);
+      doc.setTextColor(160, 148, 138);
+      doc.text(`${currentLogs.length} days logged`, midX, y + 22);
+      y += 36;
 
-      // Summary stats
-      doc.setFontSize(13);
-      doc.setTextColor(30, 21, 16);
-      doc.text('Summary', 20, y);
-      y += 8;
-
+      // Summary stats — card row
       const avg = (key) => (currentLogs.reduce((s, l) => s + (l[key] || 0), 0) / currentLogs.length).toFixed(1);
-      const stats = [
-        ['Days logged', currentLogs.length.toString()],
-        ['Average pain', avg('pain_level') + ' / 10'],
-        ['Average energy', avg('energy_level') + ' / 10'],
-        ['Average sleep', avg('sleep_hours') + ' hours'],
+      const worstDay = [...currentLogs].sort((a, b) => b.pain_level - a.pain_level)[0];
+      const cardW = (pageW - margin * 2 - 9) / 4;
+      const statCards = [
+        { label: 'AVG PAIN', val: avg('pain_level') + '/10', color: [212, 83, 126] },
+        { label: 'AVG ENERGY', val: avg('energy_level') + '/10', color: [29, 158, 117] },
+        { label: 'AVG SLEEP', val: avg('sleep_hours') + 'h', color: [30, 21, 16] },
+        { label: 'WORST PAIN', val: worstDay.pain_level + '/10', color: [163, 45, 45] },
       ];
-      doc.setFontSize(10);
-      stats.forEach((s, i) => {
-        const x = 20 + (i % 2) * 90;
-        const rowY = y + Math.floor(i / 2) * 10;
-        doc.setTextColor(110, 100, 90);
-        doc.text(s[0] + ':', x, rowY);
-        doc.setTextColor(30, 21, 16);
-        doc.text(s[1], x + 35, rowY);
+      statCards.forEach((s, i) => {
+        const x = margin + i * (cardW + 3);
+        doc.setDrawColor(235, 225, 220);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, y, cardW, 24, 2, 2, 'FD');
+        doc.setFontSize(7);
+        doc.setTextColor(160, 148, 138);
+        doc.text(s.label, x + 5, y + 8);
+        doc.setFontSize(15);
+        doc.setTextColor(...s.color);
+        doc.setFont('helvetica', 'bold');
+        doc.text(s.val, x + 5, y + 18);
+        doc.setFont('helvetica', 'normal');
       });
-      y += 28;
+      y += 36;
+
+      // Pain trend mini chart
+      doc.setFontSize(11);
+      doc.setTextColor(30, 21, 16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Pain trend', margin, y);
+      doc.setFont('helvetica', 'normal');
+      y += 6;
+
+      const chartX = margin, chartY = y, chartW = pageW - margin * 2, chartH = 28;
+      doc.setDrawColor(240, 230, 225);
+      doc.setFillColor(250, 247, 244);
+      doc.roundedRect(chartX, chartY, chartW, chartH, 2, 2, 'FD');
+      const plotLogs = currentLogs.slice(-20);
+      if (plotLogs.length > 1) {
+        const stepX = (chartW - 12) / (plotLogs.length - 1);
+        doc.setDrawColor(212, 83, 126);
+        doc.setLineWidth(0.6);
+        for (let i = 0; i < plotLogs.length - 1; i++) {
+          const x1 = chartX + 6 + i * stepX;
+          const y1 = chartY + chartH - 4 - (plotLogs[i].pain_level / 10) * (chartH - 8);
+          const x2 = chartX + 6 + (i + 1) * stepX;
+          const y2 = chartY + chartH - 4 - (plotLogs[i + 1].pain_level / 10) * (chartH - 8);
+          doc.line(x1, y1, x2, y2);
+        }
+        doc.setFillColor(212, 83, 126);
+        plotLogs.forEach((l, i) => {
+          const px = chartX + 6 + i * stepX;
+          const py = chartY + chartH - 4 - (l.pain_level / 10) * (chartH - 8);
+          doc.circle(px, py, 0.8, 'F');
+        });
+      }
+      y += chartH + 12;
 
       // Symptom frequency
-      doc.setFontSize(13);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
       doc.setTextColor(30, 21, 16);
-      doc.text('Most reported symptoms', 20, y);
+      doc.text('Most reported symptoms', margin, y);
+      doc.setFont('helvetica', 'normal');
       y += 8;
 
       const symptomCounts = { Bloating: 0, Headache: 0, 'Brain fog': 0 };
@@ -276,57 +327,78 @@ function generatePDF() {
         if (l.headache) symptomCounts.Headache++;
         if (l.brain_fog) symptomCounts['Brain fog']++;
       });
-      doc.setFontSize(10);
-      let sx = 20;
-      Object.entries(symptomCounts).forEach(([k, v]) => {
-        doc.setTextColor(110, 100, 90);
-        doc.text(`${k}: `, sx, y);
+      const symW = (pageW - margin * 2 - 6) / 3;
+      Object.entries(symptomCounts).forEach(([k, v], i) => {
+        const x = margin + i * (symW + 3);
+        const pct = currentLogs.length ? v / currentLogs.length : 0;
+        doc.setDrawColor(235, 225, 220);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, y, symW, 18, 2, 2, 'FD');
+        doc.setFontSize(8.5);
         doc.setTextColor(30, 21, 16);
-        doc.text(`${v} of ${currentLogs.length} days`, sx + 28, y);
-        y += 7;
+        doc.text(k, x + 5, y + 7);
+        doc.setFillColor(245, 235, 238);
+        doc.roundedRect(x + 5, y + 10, symW - 10, 3, 1, 1, 'F');
+        doc.setFillColor(212, 83, 126);
+        doc.roundedRect(x + 5, y + 10, Math.max((symW - 10) * pct, 1), 3, 1, 1, 'F');
+        doc.setFontSize(7);
+        doc.setTextColor(150, 140, 130);
+        doc.text(`${v} of ${currentLogs.length} days`, x + 5, y + 16.5);
       });
-      y += 10;
+      y += 28;
 
       // Daily log table
-      doc.setFontSize(13);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
       doc.setTextColor(30, 21, 16);
-      doc.text('Daily log', 20, y);
-      y += 8;
+      doc.text('Daily log', margin, y);
+      doc.setFont('helvetica', 'normal');
+      y += 7;
 
       doc.setFillColor(250, 235, 240);
-      doc.rect(20, y, pageW - 40, 8, 'F');
-      doc.setFontSize(8);
-      doc.setTextColor(150, 53, 86);
-      doc.text('DATE', 24, y + 5.5);
-      doc.text('PAIN', 70, y + 5.5);
-      doc.text('ENERGY', 95, y + 5.5);
-      doc.text('SLEEP', 125, y + 5.5);
-      doc.text('CYCLE DAY', 150, y + 5.5);
+      doc.roundedRect(margin, y, pageW - margin * 2, 8, 1, 1, 'F');
+      doc.setFontSize(7.5);
+      doc.setTextColor(153, 53, 86);
+      doc.text('DATE', margin + 4, y + 5.5);
+      doc.text('PAIN', margin + 50, y + 5.5);
+      doc.text('ENERGY', margin + 75, y + 5.5);
+      doc.text('SLEEP', margin + 105, y + 5.5);
+      doc.text('CYCLE DAY', margin + 130, y + 5.5);
       y += 10;
 
       doc.setFontSize(8.5);
-      currentLogs.slice(-25).forEach((l, idx) => {
-        if (y > 270) { doc.addPage(); y = 20; }
+      currentLogs.slice(-28).reverse().forEach((l, idx) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
         if (idx % 2 === 0) {
           doc.setFillColor(250, 247, 244);
-          doc.rect(20, y - 4, pageW - 40, 7, 'F');
+          doc.rect(margin, y - 4.5, pageW - margin * 2, 7, 'F');
         }
         doc.setTextColor(60, 50, 45);
-        doc.text(l.log_date, 24, y);
-        doc.text(String(l.pain_level ?? '-'), 70, y);
-        doc.text(String(l.energy_level ?? '-'), 95, y);
-        doc.text(l.sleep_hours ? l.sleep_hours + 'h' : '-', 125, y);
-        doc.text(l.cycle_day ? 'Day ' + l.cycle_day : '-', 150, y);
+        doc.text(l.log_date, margin + 4, y);
+        doc.setTextColor(l.pain_level >= 7 ? 163 : l.pain_level >= 4 ? 186 : 99, l.pain_level >= 7 ? 45 : l.pain_level >= 4 ? 117 : 153, l.pain_level >= 7 ? 45 : l.pain_level >= 4 ? 23 : 34);
+        doc.text(String(l.pain_level ?? '-'), margin + 50, y);
+        doc.setTextColor(60, 50, 45);
+        doc.text(String(l.energy_level ?? '-'), margin + 75, y);
+        doc.text(l.sleep_hours ? l.sleep_hours + 'h' : '-', margin + 105, y);
+        doc.text(l.cycle_day ? 'Day ' + l.cycle_day : '-', margin + 130, y);
         y += 7;
       });
 
-      // Footer disclaimer
-      y = Math.max(y + 10, 280);
-      if (y > 280) { doc.addPage(); y = 20; }
-      doc.setFontSize(8);
-      doc.setTextColor(160, 150, 140);
-      doc.text('This report summarizes self-reported data from the Flara app and is not a medical diagnosis.', 20, 285);
-      doc.text('Generated by flara.app', 20, 290);
+      // Footer on every page
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= pageCount; p++) {
+        doc.setPage(p);
+        const pH = doc.internal.pageSize.getHeight();
+        doc.setDrawColor(235, 225, 220);
+        doc.line(margin, pH - 16, pageW - margin, pH - 16);
+        doc.setFontSize(7.5);
+        doc.setTextColor(170, 160, 150);
+        doc.text('This report summarizes self-reported data from the Flara app and is not a medical diagnosis.', margin, pH - 10);
+        doc.text(`flara.app  ·  page ${p} of ${pageCount}`, pageW - margin - 32, pH - 10);
+      }
 
       doc.save(`flara-report-${new Date().toISOString().split('T')[0]}.pdf`);
 
