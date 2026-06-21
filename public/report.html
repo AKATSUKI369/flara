@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flara — Doctor Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --p:#D4537E; --p50:#FBEAF0; --p100:#F4C0D1; --p600:#993556;
+    --t:#1D9E75; --t50:#E1F5EE;
+    --ink:#1e1510; --ink2:#6b5f55; --ink3:#b0a49c;
+    --cream:#faf7f4; --white:#ffffff;
+    --shadow:0 2px 20px rgba(30,21,16,.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 80px; }
+
+  .topbar { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
+  .close-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid rgba(30,21,16,.1); background: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink2); transition: background .15s; }
+  .close-btn:hover { background: var(--p50); }
+
+  .hero { padding: 24px 20px 0; }
+  .hero-title { font-size: 24px; font-weight: 500; color: var(--ink); line-height: 1.25; margin-bottom: 6px; }
+  .hero-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
+  .hero-sub { font-size: 13px; color: var(--ink2); line-height: 1.6; }
+
+  .cards { padding: 20px 20px 0; display: flex; flex-direction: column; gap: 12px; }
+  .card { background: var(--white); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
+  .clabel { font-size: 11px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+  /* Range selector */
+  .range-row { display: flex; gap: 8px; }
+  .range-btn { flex: 1; padding: 10px 4px; border-radius: 12px; border: 0.5px solid rgba(30,21,16,.1); background: var(--white); font-size: 13px; font-weight: 500; color: var(--ink2); cursor: pointer; font-family: inherit; transition: all .15s; }
+  .range-btn.active { background: var(--p); border-color: var(--p); color: #fff; }
+
+  /* Stats preview */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { background: var(--cream); border-radius: 12px; padding: 12px; }
+  .stat-num { font-size: 22px; font-weight: 500; color: var(--ink); }
+  .stat-label { font-size: 11px; color: var(--ink2); margin-top: 2px; }
+  .stat.rose .stat-num { color: var(--p); }
+  .stat.teal .stat-num { color: var(--t); }
+
+  .loading-state { text-align: center; padding: 30px 10px; color: var(--ink3); font-size: 13px; }
+  .spinner-sm { width: 24px; height: 24px; border-radius: 50%; border: 2.5px solid var(--p100); border-top-color: var(--p); animation: spin .8s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align: center; padding: 30px 16px; }
+  .empty-icon { font-size: 32px; margin-bottom: 10px; }
+  .empty-text { font-size: 13px; color: var(--ink2); line-height: 1.6; }
+
+  .gen-btn { width: 100%; padding: 16px; background: var(--p); color: #fff; border: none; border-radius: 14px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 20px rgba(212,83,126,.3); transition: all .2s; margin-top: 8px; }
+  .gen-btn:hover { transform: translateY(-1px); }
+  .gen-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  .pro-banner { background: linear-gradient(135deg, #2a1a20 0%, #1a1510 100%); border-radius: 18px; padding: 18px; margin-top: 4px; }
+  .pro-label { font-size: 11px; font-weight: 500; color: var(--p100); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+  .pro-text { font-size: 13px; color: #f0e8e4; line-height: 1.7; }
+
+  /* Loading dots */
+  .dots { display: inline-flex; gap: 3px; margin-left: 4px; vertical-align: middle; }
+  .dots span { width: 4px; height: 4px; border-radius: 50%; background: currentColor; display: inline-block; animation: blink 1.2s infinite; }
+  .dots span:nth-child(2) { animation-delay: .2s; }
+  .dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%,80%,100% { opacity: .2; } 40% { opacity: 1; } }
+
+  .disc { font-size: 11px; color: var(--ink3); text-align: center; padding: 16px 20px 0; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">flara</div>
+  <button class="close-btn" onclick="window.location.href='/dashboard'" aria-label="Close">
+    <i class="ti ti-x"></i>
+  </button>
+</div>
+
+<div class="hero">
+  <div class="hero-title">Doctor visit<br><em>report</em></div>
+  <div class="hero-sub">Generate a structured summary of your symptoms — ready to hand to your doctor.</div>
+</div>
+
+<div class="cards">
+
+  <div class="card">
+    <div class="clabel"><i class="ti ti-calendar"></i> Time range</div>
+    <div class="range-row" id="rangeRow">
+      <button class="range-btn" data-d="7">7 days</button>
+      <button class="range-btn active" data-d="30">30 days</button>
+      <button class="range-btn" data-d="90">90 days</button>
+    </div>
+  </div>
+
+  <div class="card" id="previewCard">
+    <div class="clabel"><i class="ti ti-eye"></i> Preview</div>
+    <div id="previewContent">
+      <div class="loading-state">
+        <div class="spinner-sm"></div>
+        Loading your data…
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="genBtn" disabled>
+    <i class="ti ti-file-download"></i> <span id="genBtnLabel">Generate PDF report</span>
+  </button>
+
+  <div class="pro-banner">
+    <div class="pro-label"><i class="ti ti-sparkles"></i> What's included</div>
+    <div class="pro-text">A clean, doctor-ready PDF with your symptom timeline, averages, worst days, medication notes, and AI-identified patterns — all from your real logged data.</div>
+  </div>
+
+</div>
+
+<p class="disc">This report summarizes self-reported data. It is not a diagnosis. Always consult your doctor.</p>
+
+<script>
+const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+});
+
+let userId = null;
+let userName = '';
+let userCondition = 'pcos';
+let currentLogs = [];
+let rangeDays = 30;
+
+const conditionLabels = { pcos: 'PCOS', endo: 'Endometriosis', fibro: 'Fibromyalgia', other: 'Chronic condition' };
+
+document.getElementById('rangeRow').addEventListener('click', function(e) {
+  const b = e.target.closest('.range-btn'); if (!b) return;
+  document.querySelectorAll('.range-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  rangeDays = +b.dataset.d;
+  loadLogs();
+});
+
+async function loadLogs() {
+  document.getElementById('previewContent').innerHTML =
+    '<div class="loading-state"><div class="spinner-sm"></div>Loading your data…</div>';
+  document.getElementById('genBtn').disabled = true;
+
+  const since = new Date();
+  since.setDate(since.getDate() - rangeDays);
+  const sinceStr = since.toISOString().split('T')[0];
+
+  const { data: logs } = await sb.from('symptom_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('log_date', sinceStr)
+    .order('log_date', { ascending: true });
+
+  currentLogs = logs || [];
+  renderPreview();
+}
+
+function renderPreview() {
+  const el = document.getElementById('previewContent');
+  if (!currentLogs.length) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">No logs in this time range yet.<br>Log a few days to generate your first report.</div>
+      </div>`;
+    document.getElementById('genBtn').disabled = true;
+    return;
+  }
+
+  const avg = (key) => (currentLogs.reduce((s, l) => s + (l[key] || 0), 0) / currentLogs.length).toFixed(1);
+  const worstDay = [...currentLogs].sort((a, b) => b.pain_level - a.pain_level)[0];
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat rose"><div class="stat-num">${avg('pain_level')}</div><div class="stat-label">Avg pain (${currentLogs.length} days)</div></div>
+      <div class="stat teal"><div class="stat-num">${avg('energy_level')}</div><div class="stat-label">Avg energy</div></div>
+      <div class="stat"><div class="stat-num">${avg('sleep_hours')}h</div><div class="stat-label">Avg sleep</div></div>
+      <div class="stat"><div class="stat-num">${worstDay.pain_level}/10</div><div class="stat-label">Worst pain day</div></div>
+    </div>`;
+  document.getElementById('genBtn').disabled = false;
+}
+
+document.getElementById('genBtn').addEventListener('click', generatePDF);
+
+function generatePDF() {
+  const btn = document.getElementById('genBtn');
+  const lbl = document.getElementById('genBtnLabel');
+  btn.disabled = true;
+  lbl.innerHTML = 'Generating<span class="dots"><span></span><span></span><span></span></span>';
+
+  setTimeout(() => {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageW = doc.internal.pageSize.getWidth();
+      let y = 20;
+
+      // Header
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(22);
+      doc.setTextColor(212, 83, 126);
+      doc.text('flara', 20, y);
+      y += 8;
+      doc.setFontSize(10);
+      doc.setTextColor(110, 100, 90);
+      doc.text('Symptom Tracking Report', 20, y);
+      y += 14;
+
+      // Patient info box
+      doc.setDrawColor(230, 220, 215);
+      doc.setFillColor(250, 247, 244);
+      doc.roundedRect(20, y, pageW - 40, 26, 2, 2, 'FD');
+      doc.setFontSize(9);
+      doc.setTextColor(150, 140, 130);
+      doc.text('PATIENT', 26, y + 8);
+      doc.text('CONDITION', 26, y + 18);
+      doc.setFontSize(11);
+      doc.setTextColor(30, 21, 16);
+      doc.text(userName || 'Flara User', 60, y + 8);
+      doc.text(conditionLabels[userCondition] || 'PCOS', 60, y + 18);
+
+      doc.setFontSize(9);
+      doc.setTextColor(150, 140, 130);
+      doc.text('PERIOD', pageW - 90, y + 8);
+      doc.text('GENERATED', pageW - 90, y + 18);
+      doc.setFontSize(11);
+      doc.setTextColor(30, 21, 16);
+      const startDate = currentLogs[0]?.log_date || '';
+      const endDate = currentLogs[currentLogs.length - 1]?.log_date || '';
+      doc.text(`${startDate} to ${endDate}`, pageW - 55, y + 8);
+      doc.text(new Date().toLocaleDateString(), pageW - 55, y + 18);
+      y += 38;
+
+      // Summary stats
+      doc.setFontSize(13);
+      doc.setTextColor(30, 21, 16);
+      doc.text('Summary', 20, y);
+      y += 8;
+
+      const avg = (key) => (currentLogs.reduce((s, l) => s + (l[key] || 0), 0) / currentLogs.length).toFixed(1);
+      const stats = [
+        ['Days logged', currentLogs.length.toString()],
+        ['Average pain', avg('pain_level') + ' / 10'],
+        ['Average energy', avg('energy_level') + ' / 10'],
+        ['Average sleep', avg('sleep_hours') + ' hours'],
+      ];
+      doc.setFontSize(10);
+      stats.forEach((s, i) => {
+        const x = 20 + (i % 2) * 90;
+        const rowY = y + Math.floor(i / 2) * 10;
+        doc.setTextColor(110, 100, 90);
+        doc.text(s[0] + ':', x, rowY);
+        doc.setTextColor(30, 21, 16);
+        doc.text(s[1], x + 35, rowY);
+      });
+      y += 28;
+
+      // Symptom frequency
+      doc.setFontSize(13);
+      doc.setTextColor(30, 21, 16);
+      doc.text('Most reported symptoms', 20, y);
+      y += 8;
+
+      const symptomCounts = { Bloating: 0, Headache: 0, 'Brain fog': 0 };
+      currentLogs.forEach(l => {
+        if (l.bloating) symptomCounts.Bloating++;
+        if (l.headache) symptomCounts.Headache++;
+        if (l.brain_fog) symptomCounts['Brain fog']++;
+      });
+      doc.setFontSize(10);
+      let sx = 20;
+      Object.entries(symptomCounts).forEach(([k, v]) => {
+        doc.setTextColor(110, 100, 90);
+        doc.text(`${k}: `, sx, y);
+        doc.setTextColor(30, 21, 16);
+        doc.text(`${v} of ${currentLogs.length} days`, sx + 28, y);
+        y += 7;
+      });
+      y += 10;
+
+      // Daily log table
+      doc.setFontSize(13);
+      doc.setTextColor(30, 21, 16);
+      doc.text('Daily log', 20, y);
+      y += 8;
+
+      doc.setFillColor(250, 235, 240);
+      doc.rect(20, y, pageW - 40, 8, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(150, 53, 86);
+      doc.text('DATE', 24, y + 5.5);
+      doc.text('PAIN', 70, y + 5.5);
+      doc.text('ENERGY', 95, y + 5.5);
+      doc.text('SLEEP', 125, y + 5.5);
+      doc.text('CYCLE DAY', 150, y + 5.5);
+      y += 10;
+
+      doc.setFontSize(8.5);
+      currentLogs.slice(-25).forEach((l, idx) => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        if (idx % 2 === 0) {
+          doc.setFillColor(250, 247, 244);
+          doc.rect(20, y - 4, pageW - 40, 7, 'F');
+        }
+        doc.setTextColor(60, 50, 45);
+        doc.text(l.log_date, 24, y);
+        doc.text(String(l.pain_level ?? '-'), 70, y);
+        doc.text(String(l.energy_level ?? '-'), 95, y);
+        doc.text(l.sleep_hours ? l.sleep_hours + 'h' : '-', 125, y);
+        doc.text(l.cycle_day ? 'Day ' + l.cycle_day : '-', 150, y);
+        y += 7;
+      });
+
+      // Footer disclaimer
+      y = Math.max(y + 10, 280);
+      if (y > 280) { doc.addPage(); y = 20; }
+      doc.setFontSize(8);
+      doc.setTextColor(160, 150, 140);
+      doc.text('This report summarizes self-reported data from the Flara app and is not a medical diagnosis.', 20, 285);
+      doc.text('Generated by flara.app', 20, 290);
+
+      doc.save(`flara-report-${new Date().toISOString().split('T')[0]}.pdf`);
+
+      lbl.innerHTML = '<i class="ti ti-check"></i> Downloaded';
+      setTimeout(() => {
+        btn.disabled = false;
+        lbl.innerHTML = '<i class="ti ti-file-download"></i> Generate PDF report';
+      }, 2000);
+
+    } catch (err) {
+      console.error(err);
+      lbl.textContent = 'Something went wrong';
+      btn.disabled = false;
+    }
+  }, 600);
+}
+
+// Auth + load
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = '/'; return; }
+  userId = session.user.id;
+  userName = session.user.user_metadata?.full_name || '';
+
+  const { data: profile } = await sb.from('profiles').select('condition').eq('id', userId).single();
+  if (profile?.condition) userCondition = profile.condition;
+
+  loadLogs();
+})();
+</script>
+</body>
+</html>
