@@ -412,10 +412,10 @@
 <nav>
   <span class="nav-logo">flara</span>
   <div class="nav-links">
-    <a href="/dashboard">Dashboard</a>
-    <a href="/log">Log</a>
-    <a href="/trends" class="active">Trends</a>
-    <a href="/report">Report</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="log.html">Log</a>
+    <a href="trends.html" class="active">Trends</a>
+    <a href="report.html">Report</a>
   </div>
 </nav>
 
@@ -439,7 +439,7 @@
     <div class="icon">📈</div>
     <h3>No logs yet</h3>
     <p>Start tracking your symptoms daily and your trends will appear here automatically.</p>
-    <a href="/log" class="btn-primary">Log today's symptoms</a>
+    <a href="log.html" class="btn-primary">Log today's symptoms</a>
   </div>
 
   <!-- Content (hidden until data loads) -->
@@ -556,18 +556,10 @@
 <script>
   /* ───────────── SUPABASE INIT ───────────── */
   const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
-  const SUPABASE_ANON_KEY = (() => {
-    // Pull the key from localStorage or the global set during login
-    return localStorage.getItem('sb_anon_key') || window.SUPABASE_ANON_KEY || '';
-  })();
-
-  // Flara stores the anon key in localStorage under 'flara_anon' — adjust to match your app
-  const ANON_KEY = localStorage.getItem('flara_anon_key')
-    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrc3l3bWR0eWpoZm5ydnhtZGt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MzkyMjIsImV4cCI6MjA2MDIxNTIyMn0.YoPTuRBCaHfNnW9bXFbFk7UKt9bMPPaWBqbhpGaHFpY';
-  // ↑ Replace with your real anon key if the above doesn't work
+  const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
 
   const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, ANON_KEY);
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   /* ───────────── STATE ───────────── */
   let allLogs = [];
