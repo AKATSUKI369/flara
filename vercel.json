@@ -5,6 +5,8 @@
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/log", "destination": "/log.html" },
     { "source": "/report", "destination": "/report.html" },
-    { "source": "/trends", "destination": "/trends.html" }
+    { "source": "/trends", "destination": "/trends.html" },
+    { "source": "/community", "destination": "/community.html" },
+    { "source": "/profile", "destination": "/profile.html" }
   ]
 }

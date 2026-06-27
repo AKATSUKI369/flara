@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flara — Community</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --p:#D4537E; --p50:#FBEAF0; --p100:#F4C0D1; --p600:#993556;
+    --t:#1D9E75; --t50:#E1F5EE; --t100:#9FE1CB;
+    --ink:#1e1510; --ink2:#6b5f55; --ink3:#b0a49c;
+    --cream:#faf7f4; --white:#ffffff;
+    --shadow: 0 2px 20px rgba(30,21,16,.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 80px; }
+
+  .topbar { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
+
+  .hero { padding: 20px 20px 0; }
+  .hero-title { font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .hero-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
+  .hero-sub { font-size: 13px; color: var(--ink2); }
+
+  /* Compose box */
+  .compose { margin: 16px 20px 0; background: var(--white); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
+  .compose-top { display: flex; gap: 10px; align-items: flex-start; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--p600); flex-shrink: 0; }
+  textarea {
+    flex: 1; border: none; outline: none; resize: none;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+    background: transparent; line-height: 1.6; min-height: 60px;
+  }
+  textarea::placeholder { color: var(--ink3); }
+  .compose-bottom { display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid rgba(30,21,16,.06); gap: 8px; align-items: center; }
+  .char-count { font-size: 11px; color: var(--ink3); }
+  .post-btn { padding: 9px 20px; background: var(--p); color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
+  .post-btn:hover { opacity: .88; }
+  .post-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* Filter pills */
+  .filters { padding: 14px 20px 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter-btn { border: 0.5px solid rgba(30,21,16,.1); border-radius: 99px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: var(--ink2); cursor: pointer; background: var(--white); white-space: nowrap; font-family: inherit; transition: all .15s; flex-shrink: 0; }
+  .filter-btn.active { background: var(--p); border-color: var(--p); color: #fff; }
+
+  /* Posts */
+  .posts { padding: 12px 20px 0; display: flex; flex-direction: column; gap: 10px; }
+  .post { background: var(--white); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
+  .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .post-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--p600); flex-shrink: 0; }
+  .post-meta { flex: 1; }
+  .post-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .post-time { font-size: 11px; color: var(--ink3); }
+  .cond-pill { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; background: var(--p50); color: var(--p600); }
+  .cond-pill.endo { background: var(--t50); color: #085041; }
+  .cond-pill.fibro { background: #FAEEDA; color: #633806; }
+  .cond-pill.other { background: #F1EFE8; color: #5F5E5A; }
+  .post-content { font-size: 14px; color: var(--ink); line-height: 1.65; margin-bottom: 12px; }
+  .post-footer { display: flex; align-items: center; gap: 14px; }
+  .like-btn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; transition: color .15s; }
+  .like-btn.liked { color: var(--p); }
+  .like-btn i { font-size: 16px; }
+  .like-btn:hover { color: var(--p); }
+
+  /* Loading */
+  .loading-state { text-align: center; padding: 40px 20px; color: var(--ink3); font-size: 13px; }
+  .spinner { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid var(--p100); border-top-color: var(--p); animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 999; white-space: nowrap; }
+  #toast.show { opacity: 1; }
+
+  /* Bottom nav */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 0.5px solid rgba(30,21,16,.08); display: flex; padding: 8px 0 4px; z-index: 100; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px; color: var(--ink3); font-size: 10px; font-weight: 500; border: none; background: none; font-family: inherit; transition: color .15s; }
+  .nav-item i { font-size: 20px; }
+  .nav-item.active { color: var(--p); }
+  .nav-fab-wrap { flex: 1; display: flex; justify-content: center; }
+  .nav-fab { width: 46px; height: 46px; border-radius: 50%; background: var(--p); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 22px; margin-top: -18px; box-shadow: 0 4px 16px rgba(212,83,126,.35); font-family: inherit; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">flara</div>
+</div>
+
+<div class="hero">
+  <div class="hero-title">Community <em>support</em></div>
+  <div class="hero-sub">Anonymous, safe space for women with chronic conditions</div>
+</div>
+
+<!-- Compose -->
+<div class="compose">
+  <div class="compose-top">
+    <div class="avatar" id="composeAvatar">?</div>
+    <textarea id="postInput" placeholder="Share something — a win, a struggle, a tip…" maxlength="300" rows="3"></textarea>
+  </div>
+  <div class="compose-bottom">
+    <span class="char-count" id="charCount">0 / 300</span>
+    <button class="post-btn" id="postBtn" disabled>Post</button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <button class="filter-btn active" data-f="all">All</button>
+  <button class="filter-btn" data-f="pcos">PCOS</button>
+  <button class="filter-btn" data-f="endo">Endometriosis</button>
+  <button class="filter-btn" data-f="fibro">Fibromyalgia</button>
+</div>
+
+<!-- Posts -->
+<div class="posts" id="postsContainer">
+  <div class="loading-state"><div class="spinner"></div>Loading posts…</div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="window.location.href='/dashboard'"><i class="ti ti-home"></i>Home</button>
+  <button class="nav-item" onclick="window.location.href='/trends'"><i class="ti ti-chart-line"></i>Trends</button>
+  <div class="nav-fab-wrap"><button class="nav-fab" onclick="window.location.href='/log'"><i class="ti ti-plus"></i></button></div>
+  <button class="nav-item active"><i class="ti ti-users"></i>Community</button>
+  <button class="nav-item" onclick="window.location.href='/profile'"><i class="ti ti-user"></i>Profile</button>
+</nav>
+
+<script>
+const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+});
+
+let userId = null, userName = '', userCondition = 'pcos';
+let allPosts = [], likedPosts = new Set(), activeFilter = 'all';
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function timeAgo(dateStr) {
+  const diff = (Date.now() - new Date(dateStr)) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
+function condLabel(c) {
+  return { pcos:'PCOS', endo:'Endometriosis', fibro:'Fibromyalgia', other:'Other' }[c] || 'Other';
+}
+
+function renderPosts() {
+  const container = document.getElementById('postsContainer');
+  const filtered = activeFilter === 'all' ? allPosts : allPosts.filter(p => p.condition === activeFilter);
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="loading-state" style="padding:40px 20px">
+      <div style="font-size:32px;margin-bottom:10px">🌸</div>
+      <div style="font-size:13px;color:var(--ink2)">No posts here yet.<br>Be the first to share something.</div>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(p => {
+    const initials = p.author_name?.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || '?';
+    const liked = likedPosts.has(p.id);
+    const isOwn = p.user_id === userId;
+    return `<div class="post" id="post-${p.id}">
+      <div class="post-header">
+        <div class="post-avatar" style="${isOwn?'background:var(--p100);color:var(--p600)':''}">${initials}</div>
+        <div class="post-meta">
+          <div class="post-name">${isOwn ? 'You' : p.author_name || 'Anonymous'}</div>
+          <div class="post-time">${timeAgo(p.created_at)}</div>
+        </div>
+        <span class="cond-pill ${p.condition}">${condLabel(p.condition)}</span>
+      </div>
+      <div class="post-content">${p.content}</div>
+      <div class="post-footer">
+        <button class="like-btn ${liked?'liked':''}" onclick="toggleLike('${p.id}')">
+          <i class="ti ti-heart${liked?'-filled':''}"></i>
+          <span id="likes-${p.id}">${p.likes || 0}</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleLike(postId) {
+  if (!userId) return;
+  const liked = likedPosts.has(postId);
+  const post = allPosts.find(p => p.id === postId);
+  if (!post) return;
+
+  if (liked) {
+    likedPosts.delete(postId);
+    post.likes = Math.max(0, (post.likes || 0) - 1);
+    await sb.from('community_likes').delete().eq('post_id', postId).eq('user_id', userId);
+    await sb.from('community_posts').update({ likes: post.likes }).eq('id', postId);
+  } else {
+    likedPosts.add(postId);
+    post.likes = (post.likes || 0) + 1;
+    await sb.from('community_likes').insert({ post_id: postId, user_id: userId });
+    await sb.from('community_posts').update({ likes: post.likes }).eq('id', postId);
+  }
+
+  // Update UI without full re-render
+  const btn = document.querySelector(`#post-${postId} .like-btn`);
+  const count = document.getElementById(`likes-${postId}`);
+  if (btn) {
+    btn.classList.toggle('liked', !liked);
+    btn.querySelector('i').className = `ti ti-heart${!liked?'-filled':''}`;
+  }
+  if (count) count.textContent = post.likes;
+}
+
+async function submitPost() {
+  const input = document.getElementById('postInput');
+  const content = input.value.trim();
+  if (!content) return;
+
+  const btn = document.getElementById('postBtn');
+  btn.disabled = true; btn.textContent = 'Posting…';
+
+  const { data, error } = await sb.from('community_posts').insert({
+    user_id: userId,
+    author_name: userName,
+    condition: userCondition,
+    content,
+    likes: 0
+  }).select().single();
+
+  if (error) { toast('Something went wrong'); btn.disabled = false; btn.textContent = 'Post'; return; }
+
+  allPosts.unshift(data);
+  input.value = '';
+  document.getElementById('charCount').textContent = '0 / 300';
+  btn.disabled = true;
+  btn.textContent = 'Post';
+  renderPosts();
+  toast('Posted! 🌸');
+}
+
+// Compose
+document.getElementById('postInput').addEventListener('input', function() {
+  const len = this.value.length;
+  document.getElementById('charCount').textContent = `${len} / 300`;
+  document.getElementById('postBtn').disabled = len === 0;
+});
+document.getElementById('postBtn').addEventListener('click', submitPost);
+
+// Filters
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.f;
+    renderPosts();
+  });
+});
+
+// Boot
+(async () => {
+  const { data:{ session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = '/'; return; }
+  userId = session.user.id;
+
+  const { data: profile } = await sb.from('profiles').select('name, condition').eq('id', userId).single();
+  userName = profile?.name || session.user.user_metadata?.full_name || 'Anonymous';
+  userCondition = profile?.condition || 'pcos';
+
+  const initials = userName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('composeAvatar').textContent = initials;
+
+  // Load posts
+  const { data: posts } = await sb.from('community_posts').select('*').order('created_at', { ascending: false });
+  allPosts = posts || [];
+
+  // Load liked posts
+  const { data: likes } = await sb.from('community_likes').select('post_id').eq('user_id', userId);
+  if (likes) likes.forEach(l => likedPosts.add(l.post_id));
+
+  renderPosts();
+})();
+</script>
+</body>
+</html>

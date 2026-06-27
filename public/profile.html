@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flara — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --p:#D4537E; --p50:#FBEAF0; --p100:#F4C0D1; --p600:#993556;
+    --t:#1D9E75; --t50:#E1F5EE; --t100:#9FE1CB;
+    --a:#BA7517; --a50:#FAEEDA;
+    --ink:#1e1510; --ink2:#6b5f55; --ink3:#b0a49c;
+    --cream:#faf7f4; --white:#ffffff;
+    --shadow: 0 2px 20px rgba(30,21,16,.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 80px; }
+
+  /* Header */
+  .topbar { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
+
+  /* Profile hero */
+  .profile-hero { padding: 24px 20px 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .big-avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 500; color: var(--p600); margin-bottom: 12px; border: 3px solid var(--white); box-shadow: 0 4px 16px rgba(212,83,126,.2); }
+  .profile-name { font-size: 20px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .profile-email { font-size: 12px; color: var(--ink3); margin-bottom: 10px; }
+  .plan-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 500; background: var(--p50); color: var(--p600); }
+  .plan-badge.pro { background: linear-gradient(135deg, #D4537E, #993556); color: #fff; }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 20px 20px 0; }
+  .stat-box { background: var(--white); border-radius: 14px; padding: 14px 10px; text-align: center; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
+  .stat-box-num { font-size: 22px; font-weight: 500; color: var(--ink); font-family: 'Fraunces', serif; }
+  .stat-box-num.rose { color: var(--p); }
+  .stat-box-num.teal { color: var(--t); }
+  .stat-box-label { font-size: 10px; color: var(--ink3); margin-top: 2px; font-weight: 500; }
+
+  /* Cards */
+  .cards { padding: 14px 20px 0; display: flex; flex-direction: column; gap: 10px; }
+  .card { background: var(--white); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; font-size: 11px; }
+
+  /* Settings rows */
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 0.5px solid rgba(30,21,16,.06); }
+  .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .setting-row:first-of-type { padding-top: 0; }
+  .setting-label { font-size: 14px; color: var(--ink); font-weight: 500; }
+  .setting-sub { font-size: 12px; color: var(--ink3); margin-top: 1px; }
+  .setting-val { font-size: 13px; color: var(--ink2); }
+  .edit-btn { font-size: 12px; color: var(--p); background: none; border: none; cursor: pointer; font-family: inherit; font-weight: 500; }
+
+  /* Condition selector */
+  .cond-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cond-btn { border: 0.5px solid rgba(30,21,16,.1); border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--ink2); cursor: pointer; background: var(--white); font-family: inherit; transition: all .15s; }
+  .cond-btn.active { background: var(--p50); border-color: var(--p100); color: var(--p600); }
+
+  /* Cycle stepper */
+  .cycle-row { display: flex; align-items: center; gap: 14px; }
+  .c-btn { width: 36px; height: 36px; border-radius: 50%; border: 0.5px solid rgba(30,21,16,.1); background: var(--cream); font-size: 20px; color: var(--p); cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+  .c-val { font-size: 28px; font-weight: 500; color: var(--ink); font-family: 'Fraunces', serif; font-weight: 300; min-width: 48px; text-align: center; }
+  .c-unit { font-size: 12px; color: var(--ink3); }
+
+  /* Save btn */
+  .save-btn { width: 100%; padding: 14px; background: var(--p); color: #fff; border: none; border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 16px rgba(212,83,126,.25); transition: opacity .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .save-btn:hover { opacity: .9; }
+  .save-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* Pro banner */
+  .pro-banner { background: linear-gradient(135deg, #2a1a20 0%, #1a1510 100%); border-radius: 18px; padding: 18px; }
+  .pro-label { font-size: 11px; font-weight: 500; color: var(--p100); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+  .pro-text { font-size: 13px; color: #f0e8e4; line-height: 1.6; margin-bottom: 14px; }
+  .pro-btn { display: inline-block; padding: 11px 22px; background: var(--p); color: #fff; border-radius: 10px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; font-family: inherit; }
+
+  /* Danger */
+  .danger-btn { width: 100%; padding: 13px; background: none; border: 0.5px solid rgba(163,45,45,.2); border-radius: 14px; font-family: inherit; font-size: 14px; font-weight: 500; color: #A32D2D; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s; }
+  .danger-btn:hover { background: #FDF0F0; }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 999; white-space: nowrap; }
+  #toast.show { opacity: 1; }
+
+  /* Bottom nav */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 0.5px solid rgba(30,21,16,.08); display: flex; padding: 8px 0 4px; z-index: 100; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px; color: var(--ink3); font-size: 10px; font-weight: 500; border: none; background: none; font-family: inherit; transition: color .15s; }
+  .nav-item i { font-size: 20px; }
+  .nav-item.active { color: var(--p); }
+  .nav-fab-wrap { flex: 1; display: flex; justify-content: center; }
+  .nav-fab { width: 46px; height: 46px; border-radius: 50%; background: var(--p); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 22px; margin-top: -18px; box-shadow: 0 4px 16px rgba(212,83,126,.35); font-family: inherit; }
+
+  /* Spinner */
+  .spinner { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid var(--p100); border-top-color: var(--p); animation: spin .8s linear infinite; margin: 60px auto; display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">flara</div>
+</div>
+
+<div id="pageContent">
+  <div class="spinner"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="window.location.href='/dashboard'"><i class="ti ti-home"></i>Home</button>
+  <button class="nav-item" onclick="window.location.href='/trends'"><i class="ti ti-chart-line"></i>Trends</button>
+  <div class="nav-fab-wrap"><button class="nav-fab" onclick="window.location.href='/log'"><i class="ti ti-plus"></i></button></div>
+  <button class="nav-item" onclick="window.location.href='/community'"><i class="ti ti-users"></i>Community</button>
+  <button class="nav-item active"><i class="ti ti-user"></i>Profile</button>
+</nav>
+
+<script>
+const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+});
+
+let userId, profile, logs = [];
+let cycleLen = 28;
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+const conditionLabels = { pcos:'PCOS 🌸', endo:'Endometriosis 🌿', fibro:'Fibromyalgia ⚡', other:'Other 💙' };
+
+function calcStreak(logs) {
+  const dates = logs.map(l=>l.log_date).sort().reverse();
+  const today = new Date().toISOString().split('T')[0];
+  let streak = 0, check = new Date();
+  for (let i=0; i<60; i++) {
+    const ds = check.toISOString().split('T')[0];
+    if (dates.includes(ds)) { streak++; check.setDate(check.getDate()-1); }
+    else if (ds === today) { check.setDate(check.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+
+function renderPage() {
+  const name = profile.name || 'Flara User';
+  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const streak = calcStreak(logs);
+  const totalLogs = logs.length;
+  const avgPain = logs.length ? (logs.reduce((s,l)=>s+(l.pain_level||0),0)/logs.length).toFixed(1) : '—';
+  const isPro = profile.plan === 'pro';
+  cycleLen = profile.cycle_length || 28;
+
+  document.getElementById('pageContent').innerHTML = `
+
+    <!-- Profile hero -->
+    <div class="profile-hero">
+      <div class="big-avatar">${initials}</div>
+      <div class="profile-name">${name}</div>
+      <div class="profile-email">${profile.email || ''}</div>
+      <span class="plan-badge ${isPro?'pro':''}">${isPro ? '✦ Pro member' : 'Free plan'}</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-box-num">${streak}</div>
+        <div class="stat-box-label">Day streak 🔥</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-num">${totalLogs}</div>
+        <div class="stat-box-label">Total logs</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-num rose">${avgPain}</div>
+        <div class="stat-box-label">Avg pain</div>
+      </div>
+    </div>
+
+    <div class="cards">
+
+      <!-- Condition & cycle settings -->
+      <div class="card">
+        <div class="card-title"><i class="ti ti-settings"></i> Health settings</div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Condition</div>
+            <div class="setting-sub">Personalises your AI insights</div>
+          </div>
+        </div>
+        <div class="cond-row" style="margin-bottom:16px">
+          ${['pcos','endo','fibro','other'].map(c => `
+            <button class="cond-btn ${profile.condition===c?'active':''}" data-c="${c}" onclick="selectCond(this)">${conditionLabels[c]}</button>
+          `).join('')}
+        </div>
+
+        <div class="setting-row" style="border-bottom:none">
+          <div>
+            <div class="setting-label">Cycle length</div>
+            <div class="setting-sub">Used to predict your phases</div>
+          </div>
+        </div>
+        <div class="cycle-row" style="margin-bottom:4px">
+          <button class="c-btn" id="cycleM">−</button>
+          <div>
+            <div class="c-val" id="cycleVal">${cycleLen}</div>
+            <div class="c-unit" style="text-align:center">days</div>
+          </div>
+          <button class="c-btn" id="cycleP">+</button>
+        </div>
+      </div>
+
+      <button class="save-btn" id="saveBtn" onclick="saveSettings()">
+        <i class="ti ti-check"></i> Save changes
+      </button>
+
+      <!-- Account -->
+      <div class="card">
+        <div class="card-title"><i class="ti ti-user-circle"></i> Account</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Name</div>
+            <div class="setting-sub">${name}</div>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Email</div>
+            <div class="setting-sub">${profile.email || 'Not set'}</div>
+          </div>
+        </div>
+        <div class="setting-row" style="border-bottom:none">
+          <div>
+            <div class="setting-label">Member since</div>
+            <div class="setting-sub">${new Date(profile.created_at).toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>
+          </div>
+        </div>
+      </div>
+
+      ${!isPro ? `
+      <!-- Upgrade -->
+      <div class="pro-banner">
+        <div class="pro-label"><i class="ti ti-sparkles"></i> Upgrade to Pro</div>
+        <div class="pro-text">Unlock trigger analysis, unlimited history, doctor PDF reports, and flare prediction — ₹499/month.</div>
+        <button class="pro-btn">Upgrade now →</button>
+      </div>` : ''}
+
+      <!-- Data & privacy -->
+      <div class="card">
+        <div class="card-title"><i class="ti ti-shield"></i> Data & privacy</div>
+        <div class="setting-row">
+          <div class="setting-label">Your data</div>
+          <div class="setting-val" style="font-size:12px;color:var(--t)">Encrypted ✓</div>
+        </div>
+        <div class="setting-row" style="border-bottom:none">
+          <div class="setting-label">Never sold or shared</div>
+          <div class="setting-val" style="font-size:12px;color:var(--t)">Guaranteed ✓</div>
+        </div>
+      </div>
+
+      <!-- Sign out + delete -->
+      <button class="danger-btn" onclick="signOut()">
+        <i class="ti ti-logout"></i> Sign out
+      </button>
+
+    </div>
+  `;
+
+  // Cycle stepper
+  document.getElementById('cycleM').addEventListener('click', () => {
+    cycleLen = Math.max(21, cycleLen-1);
+    document.getElementById('cycleVal').textContent = cycleLen;
+  });
+  document.getElementById('cycleP').addEventListener('click', () => {
+    cycleLen = Math.min(45, cycleLen+1);
+    document.getElementById('cycleVal').textContent = cycleLen;
+  });
+}
+
+function selectCond(el) {
+  document.querySelectorAll('.cond-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  profile.condition = el.dataset.c;
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
+  const { error } = await sb.from('profiles').update({
+    condition: profile.condition,
+    cycle_length: cycleLen
+  }).eq('id', userId);
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-check"></i> Save changes';
+  if (error) { toast('Something went wrong'); return; }
+  toast('Settings saved ✓');
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  window.location.href = '/';
+}
+
+(async () => {
+  const { data:{ session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = '/'; return; }
+  userId = session.user.id;
+
+  const [{ data: p }, { data: l }] = await Promise.all([
+    sb.from('profiles').select('*').eq('id', userId).single(),
+    sb.from('symptom_logs').select('log_date, pain_level').eq('user_id', userId)
+  ]);
+
+  profile = p || { name: session.user.user_metadata?.full_name, email: session.user.email, condition:'pcos', plan:'free', cycle_length:28, created_at: new Date().toISOString() };
+  logs = l || [];
+
+  renderPage();
+})();
+</script>
+</body>
+</html>
