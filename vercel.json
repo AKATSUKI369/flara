@@ -4,6 +4,7 @@
     { "source": "/onboarding", "destination": "/onboarding.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/log", "destination": "/log.html" },
-    { "source": "/report", "destination": "/report.html" }
+    { "source": "/report", "destination": "/report.html" },
+    { "source": "/trends", "destination": "/trends.html" }
   ]
 }
