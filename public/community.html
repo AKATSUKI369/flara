@@ -72,6 +72,9 @@
   .reply-toggle-btn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; transition: color .15s; }
   .reply-toggle-btn:hover { color: var(--t); }
   .reply-toggle-btn i { font-size: 16px; }
+  .delete-btn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; margin-left: auto; transition: color .15s; }
+  .delete-btn:hover { color: #A32D2D; }
+  .delete-btn i { font-size: 16px; }
 
   /* Replies */
   .replies-section { margin-top: 12px; padding-top: 12px; border-top: 0.5px solid rgba(30,21,16,.06); display: none; }
@@ -280,6 +283,9 @@ function renderPosts() {
           <i class="ti ti-message-circle"></i>
           <span id="reply-count-${p.id}">${replyCount} ${replyCount===1?'reply':'replies'}</span>
         </button>
+        ${isOwn ? `<button class="delete-btn" onclick="deletePost('${p.id}')">
+          <i class="ti ti-trash"></i>
+        </button>` : ''}
       </div>
 
       <div class="replies-section" id="replies-${p.id}">
@@ -342,6 +348,19 @@ async function submitReply(postId) {
 
   input.value = '';
   toast('Reply posted 🌸');
+}
+
+/* ── delete post ── */
+async function deletePost(postId) {
+  if (!confirm('Delete this post? This will also remove all its replies and cannot be undone.')) return;
+
+  const { error } = await sb.from('community_posts').delete().eq('id', postId).eq('user_id', userId);
+  if (error) { toast('Could not delete — try again'); return; }
+
+  allPosts = allPosts.filter(p => p.id !== postId);
+  delete allReplies[postId];
+  renderPosts();
+  toast('Post deleted');
 }
 
 /* ── like toggle ── */
