@@ -333,7 +333,7 @@ function userDisplayNameUpdated() {
   // no-op hook in case other UI needs to react; kept for clarity
 }
 
-
+async function saveSettings() {
   const btn = document.getElementById('saveBtn');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
   const { error } = await sb.from('profiles').update({
