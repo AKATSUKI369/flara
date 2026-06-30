@@ -27,23 +27,19 @@
   .hero-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
   .hero-sub { font-size: 13px; color: var(--ink2); }
 
-  /* Compose box */
+  /* Compose */
   .compose { margin: 16px 20px 0; background: var(--white); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
   .compose-top { display: flex; gap: 10px; align-items: flex-start; }
   .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--p600); flex-shrink: 0; }
-  textarea {
-    flex: 1; border: none; outline: none; resize: none;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
-    background: transparent; line-height: 1.6; min-height: 60px;
-  }
-  textarea::placeholder { color: var(--ink3); }
+  .compose-textarea { flex: 1; border: none; outline: none; resize: none; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); background: transparent; line-height: 1.6; min-height: 60px; }
+  .compose-textarea::placeholder { color: var(--ink3); }
   .compose-bottom { display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid rgba(30,21,16,.06); gap: 8px; align-items: center; }
   .char-count { font-size: 11px; color: var(--ink3); }
   .post-btn { padding: 9px 20px; background: var(--p); color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
   .post-btn:hover { opacity: .88; }
   .post-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-  /* Filter pills */
+  /* Filters */
   .filters { padding: 14px 20px 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
   .filters::-webkit-scrollbar { display: none; }
   .filter-btn { border: 0.5px solid rgba(30,21,16,.1); border-radius: 99px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: var(--ink2); cursor: pointer; background: var(--white); white-space: nowrap; font-family: inherit; transition: all .15s; flex-shrink: 0; }
@@ -51,22 +47,54 @@
 
   /* Posts */
   .posts { padding: 12px 20px 0; display: flex; flex-direction: column; gap: 10px; }
+
   .post { background: var(--white); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
   .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .post-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--p600); flex-shrink: 0; }
+  .post-avatar.teal { background: var(--t50); color: #085041; }
+  .post-avatar.amber { background: #FAEEDA; color: #633806; }
+  .post-avatar.gray { background: #F1EFE8; color: #5F5E5A; }
   .post-meta { flex: 1; }
   .post-name { font-size: 13px; font-weight: 500; color: var(--ink); }
   .post-time { font-size: 11px; color: var(--ink3); }
-  .cond-pill { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; background: var(--p50); color: var(--p600); }
+  .cond-pill { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; background: var(--p50); color: var(--p600); flex-shrink: 0; }
   .cond-pill.endo { background: var(--t50); color: #085041; }
   .cond-pill.fibro { background: #FAEEDA; color: #633806; }
   .cond-pill.other { background: #F1EFE8; color: #5F5E5A; }
+
   .post-content { font-size: 14px; color: var(--ink); line-height: 1.65; margin-bottom: 12px; }
+
   .post-footer { display: flex; align-items: center; gap: 14px; }
   .like-btn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; transition: color .15s; }
   .like-btn.liked { color: var(--p); }
-  .like-btn i { font-size: 16px; }
   .like-btn:hover { color: var(--p); }
+  .like-btn i { font-size: 16px; }
+  .reply-toggle-btn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; transition: color .15s; }
+  .reply-toggle-btn:hover { color: var(--t); }
+  .reply-toggle-btn i { font-size: 16px; }
+
+  /* Replies */
+  .replies-section { margin-top: 12px; padding-top: 12px; border-top: 0.5px solid rgba(30,21,16,.06); display: none; }
+  .replies-section.open { display: block; }
+  .reply { display: flex; gap: 8px; margin-bottom: 10px; }
+  .reply-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--t50); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; color: #085041; flex-shrink: 0; margin-top: 1px; }
+  .reply-body { flex: 1; }
+  .reply-name { font-size: 12px; font-weight: 500; color: var(--ink); }
+  .reply-time { font-size: 10px; color: var(--ink3); margin-left: 6px; }
+  .reply-text { font-size: 13px; color: var(--ink2); line-height: 1.55; margin-top: 2px; }
+
+  /* Reply compose */
+  .reply-compose { display: flex; gap: 8px; align-items: flex-end; margin-top: 10px; }
+  .reply-compose .reply-avatar { margin-top: 0; }
+  .reply-input-wrap { flex: 1; background: var(--cream); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; }
+  .reply-input { flex: 1; border: none; outline: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); }
+  .reply-input::placeholder { color: var(--ink3); }
+  .reply-send-btn { width: 30px; height: 30px; border-radius: 50%; background: var(--p); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 14px; flex-shrink: 0; transition: opacity .15s; }
+  .reply-send-btn:hover { opacity: .85; }
+  .reply-send-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* Empty */
+  .no-replies { font-size: 12px; color: var(--ink3); font-style: italic; margin-bottom: 10px; }
 
   /* Loading */
   .loading-state { text-align: center; padding: 40px 20px; color: var(--ink3); font-size: 13px; }
@@ -97,11 +125,10 @@
   <div class="hero-sub">Anonymous, safe space for women with chronic conditions</div>
 </div>
 
-<!-- Compose -->
 <div class="compose">
   <div class="compose-top">
     <div class="avatar" id="composeAvatar">?</div>
-    <textarea id="postInput" placeholder="Share something — a win, a struggle, a tip…" maxlength="300" rows="3"></textarea>
+    <textarea class="compose-textarea" id="postInput" placeholder="Share something — a win, a struggle, a tip…" maxlength="300" rows="3"></textarea>
   </div>
   <div class="compose-bottom">
     <span class="char-count" id="charCount">0 / 300</span>
@@ -109,7 +136,6 @@
   </div>
 </div>
 
-<!-- Filters -->
 <div class="filters">
   <button class="filter-btn active" data-f="all">All</button>
   <button class="filter-btn" data-f="pcos">PCOS</button>
@@ -117,14 +143,12 @@
   <button class="filter-btn" data-f="fibro">Fibromyalgia</button>
 </div>
 
-<!-- Posts -->
 <div class="posts" id="postsContainer">
   <div class="loading-state"><div class="spinner"></div>Loading posts…</div>
 </div>
 
 <div id="toast"></div>
 
-<!-- Bottom nav -->
 <nav class="bottom-nav">
   <button class="nav-item" onclick="window.location.href='/dashboard'"><i class="ti ti-home"></i>Home</button>
   <button class="nav-item" onclick="window.location.href='/trends'"><i class="ti ti-chart-line"></i>Trends</button>
@@ -140,9 +164,10 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
 });
 
-let userId = null, userName = '', userCondition = 'pcos';
-let allPosts = [], likedPosts = new Set(), activeFilter = 'all';
+let userId = null, userDisplayName = '', userCondition = 'pcos';
+let allPosts = [], allReplies = {}, likedPosts = new Set(), activeFilter = 'all';
 
+/* ── helpers ── */
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
@@ -161,12 +186,65 @@ function condLabel(c) {
   return { pcos:'PCOS', endo:'Endometriosis', fibro:'Fibromyalgia', other:'Other' }[c] || 'Other';
 }
 
+const avatarColors = ['', 'teal', 'amber', 'gray'];
+function avatarColor(str) {
+  let hash = 0;
+  for (let i=0; i<str.length; i++) hash = str.charCodeAt(i) + ((hash<<5)-hash);
+  return avatarColors[Math.abs(hash) % avatarColors.length];
+}
+
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+}
+
+/* ── render replies ── */
+function renderReplies(postId) {
+  const replies = allReplies[postId] || [];
+  const userInitials = initials(userDisplayName);
+  const userAvatarColor = avatarColor(userId || '');
+
+  let html = '';
+  if (!replies.length) {
+    html += `<div class="no-replies">No replies yet — be the first to respond.</div>`;
+  } else {
+    html += replies.map(r => {
+      const isOwn = r.user_id === userId;
+      const displayName = isOwn ? userDisplayName : r.author_name;
+      const ini = initials(displayName);
+      const col = avatarColor(r.user_id || '');
+      return `<div class="reply">
+        <div class="reply-avatar ${col}">${ini}</div>
+        <div class="reply-body">
+          <span class="reply-name">${displayName}</span>
+          <span class="reply-time">${timeAgo(r.created_at)}</span>
+          <div class="reply-text">${r.content}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Reply compose box
+  html += `<div class="reply-compose">
+    <div class="reply-avatar ${userAvatarColor}">${userInitials}</div>
+    <div class="reply-input-wrap">
+      <input class="reply-input" id="replyInput-${postId}" placeholder="Reply…" maxlength="200">
+      <button class="reply-send-btn" onclick="submitReply('${postId}')" title="Send">
+        <i class="ti ti-send"></i>
+      </button>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+/* ── render posts ── */
 function renderPosts() {
   const container = document.getElementById('postsContainer');
   const filtered = activeFilter === 'all' ? allPosts : allPosts.filter(p => p.condition === activeFilter);
 
   if (!filtered.length) {
-    container.innerHTML = `<div class="loading-state" style="padding:40px 20px">
+    container.innerHTML = `<div class="loading-state">
       <div style="font-size:32px;margin-bottom:10px">🌸</div>
       <div style="font-size:13px;color:var(--ink2)">No posts here yet.<br>Be the first to share something.</div>
     </div>`;
@@ -174,29 +252,99 @@ function renderPosts() {
   }
 
   container.innerHTML = filtered.map(p => {
-    const initials = p.author_name?.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || '?';
-    const liked = likedPosts.has(p.id);
     const isOwn = p.user_id === userId;
+    const displayName = isOwn ? userDisplayName : p.author_name;
+    const ini = initials(displayName);
+    const col = avatarColor(p.user_id || '');
+    const liked = likedPosts.has(p.id);
+    const replyCount = (allReplies[p.id] || []).length;
+
     return `<div class="post" id="post-${p.id}">
       <div class="post-header">
-        <div class="post-avatar" style="${isOwn?'background:var(--p100);color:var(--p600)':''}">${initials}</div>
+        <div class="post-avatar ${col}">${ini}</div>
         <div class="post-meta">
-          <div class="post-name">${isOwn ? 'You' : p.author_name || 'Anonymous'}</div>
+          <div class="post-name">${displayName}${isOwn ? ' <span style="font-size:10px;color:var(--ink3)">(you)</span>' : ''}</div>
           <div class="post-time">${timeAgo(p.created_at)}</div>
         </div>
         <span class="cond-pill ${p.condition}">${condLabel(p.condition)}</span>
       </div>
+
       <div class="post-content">${p.content}</div>
+
       <div class="post-footer">
         <button class="like-btn ${liked?'liked':''}" onclick="toggleLike('${p.id}')">
           <i class="ti ti-heart${liked?'-filled':''}"></i>
           <span id="likes-${p.id}">${p.likes || 0}</span>
         </button>
+        <button class="reply-toggle-btn" onclick="toggleReplies('${p.id}')">
+          <i class="ti ti-message-circle"></i>
+          <span id="reply-count-${p.id}">${replyCount} ${replyCount===1?'reply':'replies'}</span>
+        </button>
+      </div>
+
+      <div class="replies-section" id="replies-${p.id}">
+        ${renderReplies(p.id)}
       </div>
     </div>`;
   }).join('');
 }
 
+/* ── toggle replies ── */
+function toggleReplies(postId) {
+  const section = document.getElementById(`replies-${postId}`);
+  const isOpen = section.classList.contains('open');
+  section.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    // focus the reply input
+    setTimeout(() => {
+      const input = document.getElementById(`replyInput-${postId}`);
+      if (input) input.focus();
+    }, 50);
+  }
+}
+
+/* ── submit reply ── */
+async function submitReply(postId) {
+  const input = document.getElementById(`replyInput-${postId}`);
+  const content = input.value.trim();
+  if (!content) return;
+
+  const btn = input.nextElementSibling;
+  btn.disabled = true;
+  input.disabled = true;
+
+  const { data, error } = await sb.from('community_replies').insert({
+    post_id: postId,
+    user_id: userId,
+    author_name: userDisplayName,
+    content
+  }).select().single();
+
+  btn.disabled = false;
+  input.disabled = false;
+
+  if (error) { toast('Something went wrong'); return; }
+
+  if (!allReplies[postId]) allReplies[postId] = [];
+  allReplies[postId].push(data);
+
+  // Update reply count label
+  const count = allReplies[postId].length;
+  const countEl = document.getElementById(`reply-count-${postId}`);
+  if (countEl) countEl.textContent = `${count} ${count===1?'reply':'replies'}`;
+
+  // Re-render replies section
+  const section = document.getElementById(`replies-${postId}`);
+  if (section) {
+    section.innerHTML = renderReplies(postId);
+    section.classList.add('open');
+  }
+
+  input.value = '';
+  toast('Reply posted 🌸');
+}
+
+/* ── like toggle ── */
 async function toggleLike(postId) {
   if (!userId) return;
   const liked = likedPosts.has(postId);
@@ -205,17 +353,16 @@ async function toggleLike(postId) {
 
   if (liked) {
     likedPosts.delete(postId);
-    post.likes = Math.max(0, (post.likes || 0) - 1);
+    post.likes = Math.max(0, (post.likes||0) - 1);
     await sb.from('community_likes').delete().eq('post_id', postId).eq('user_id', userId);
     await sb.from('community_posts').update({ likes: post.likes }).eq('id', postId);
   } else {
     likedPosts.add(postId);
-    post.likes = (post.likes || 0) + 1;
+    post.likes = (post.likes||0) + 1;
     await sb.from('community_likes').insert({ post_id: postId, user_id: userId });
     await sb.from('community_posts').update({ likes: post.likes }).eq('id', postId);
   }
 
-  // Update UI without full re-render
   const btn = document.querySelector(`#post-${postId} .like-btn`);
   const count = document.getElementById(`likes-${postId}`);
   if (btn) {
@@ -225,6 +372,7 @@ async function toggleLike(postId) {
   if (count) count.textContent = post.likes;
 }
 
+/* ── submit post ── */
 async function submitPost() {
   const input = document.getElementById('postInput');
   const content = input.value.trim();
@@ -235,24 +383,25 @@ async function submitPost() {
 
   const { data, error } = await sb.from('community_posts').insert({
     user_id: userId,
-    author_name: userName,
+    author_name: userDisplayName,
     condition: userCondition,
     content,
     likes: 0
   }).select().single();
 
-  if (error) { toast('Something went wrong'); btn.disabled = false; btn.textContent = 'Post'; return; }
+  btn.disabled = true; btn.textContent = 'Post';
 
+  if (error) { toast('Something went wrong'); btn.disabled = false; return; }
+
+  allReplies[data.id] = [];
   allPosts.unshift(data);
   input.value = '';
   document.getElementById('charCount').textContent = '0 / 300';
-  btn.disabled = true;
-  btn.textContent = 'Post';
   renderPosts();
   toast('Posted! 🌸');
 }
 
-// Compose
+/* ── compose listeners ── */
 document.getElementById('postInput').addEventListener('input', function() {
   const len = this.value.length;
   document.getElementById('charCount').textContent = `${len} / 300`;
@@ -260,7 +409,7 @@ document.getElementById('postInput').addEventListener('input', function() {
 });
 document.getElementById('postBtn').addEventListener('click', submitPost);
 
-// Filters
+/* ── filter listeners ── */
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -270,26 +419,34 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
-// Boot
+/* ── boot ── */
 (async () => {
   const { data:{ session } } = await sb.auth.getSession();
   if (!session) { window.location.href = '/'; return; }
   userId = session.user.id;
 
   const { data: profile } = await sb.from('profiles').select('name, condition').eq('id', userId).single();
-  userName = profile?.name || session.user.user_metadata?.full_name || 'Anonymous';
-  userCondition = profile?.condition || 'pcos';
+  userDisplayName = profile?.name || session.user.user_metadata?.full_name || 'Anonymous';
+  userCondition   = profile?.condition || 'pcos';
 
-  const initials = userName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('composeAvatar').textContent = initials;
+  const ini = initials(userDisplayName);
+  document.getElementById('composeAvatar').textContent = ini;
 
-  // Load posts
-  const { data: posts } = await sb.from('community_posts').select('*').order('created_at', { ascending: false });
+  // Load posts + likes + replies in parallel
+  const [{ data: posts }, { data: likes }, { data: replies }] = await Promise.all([
+    sb.from('community_posts').select('*').order('created_at', { ascending: false }),
+    sb.from('community_likes').select('post_id').eq('user_id', userId),
+    sb.from('community_replies').select('*').order('created_at', { ascending: true })
+  ]);
+
   allPosts = posts || [];
-
-  // Load liked posts
-  const { data: likes } = await sb.from('community_likes').select('post_id').eq('user_id', userId);
   if (likes) likes.forEach(l => likedPosts.add(l.post_id));
+
+  // Group replies by post_id
+  (replies || []).forEach(r => {
+    if (!allReplies[r.post_id]) allReplies[r.post_id] = [];
+    allReplies[r.post_id].push(r);
+  });
 
   renderPosts();
 })();
