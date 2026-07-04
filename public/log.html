@@ -266,7 +266,6 @@
 <script>
 const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
-const ANTHROPIC_KEY = 'YOUR_ANTHROPIC_KEY_HERE';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
@@ -469,20 +468,13 @@ Today's data:
 Respond with only the insight text. No labels, no formatting.`;
 
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': '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'
-  },
-  body: JSON.stringify({
-    model: 'llama3-8b-8192',
-    max_tokens: 180,
-    messages: [{ role: 'user', content: prompt }]
-  })
-});
-const data = await res.json();
-const insight = data.choices?.[0]?.message?.content?.trim() || fallbackInsight();
+      const res = await fetch('/api/insight', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      const insight = data.insight || fallbackInsight();
 
       document.getElementById('insLoading').style.display = 'none';
       typeWrite(insight, document.getElementById('insTxt'));
