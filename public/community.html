@@ -363,32 +363,55 @@ async function deletePost(postId) {
   toast('Post deleted');
 }
 
-/* ── like toggle ── */
+/* ── like toggle ──
+   Uses the increment_post_likes RPC (SECURITY DEFINER, delta must be +1/-1)
+   instead of a direct table UPDATE, since RLS no longer permits non-owners
+   to update other users' community_posts rows directly. */
 async function toggleLike(postId) {
   if (!userId) return;
   const liked = likedPosts.has(postId);
   const post = allPosts.find(p => p.id === postId);
   if (!post) return;
 
-  if (liked) {
-    likedPosts.delete(postId);
-    post.likes = Math.max(0, (post.likes||0) - 1);
-    await sb.from('community_likes').delete().eq('post_id', postId).eq('user_id', userId);
-    await sb.from('community_posts').update({ likes: post.likes }).eq('id', postId);
-  } else {
-    likedPosts.add(postId);
-    post.likes = (post.likes||0) + 1;
-    await sb.from('community_likes').insert({ post_id: postId, user_id: userId });
-    await sb.from('community_posts').update({ likes: post.likes }).eq('id', postId);
-  }
-
+  const delta = liked ? -1 : 1;
   const btn = document.querySelector(`#post-${postId} .like-btn`);
-  const count = document.getElementById(`likes-${postId}`);
+
+  // Optimistic UI update
+  if (liked) { likedPosts.delete(postId); } else { likedPosts.add(postId); }
   if (btn) {
     btn.classList.toggle('liked', !liked);
     btn.querySelector('i').className = `ti ti-heart${!liked?'-filled':''}`;
   }
-  if (count) count.textContent = post.likes;
+
+  try {
+    if (liked) {
+      const { error } = await sb.from('community_likes').delete().eq('post_id', postId).eq('user_id', userId);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from('community_likes').insert({ post_id: postId, user_id: userId });
+      if (error) throw error;
+    }
+
+    const { data: newCount, error: rpcError } = await sb.rpc('increment_post_likes', {
+      post_id: postId,
+      delta
+    });
+    if (rpcError) throw rpcError;
+
+    post.likes = newCount;
+    const count = document.getElementById(`likes-${postId}`);
+    if (count) count.textContent = post.likes;
+
+  } catch (e) {
+    console.error(e);
+    // Revert optimistic UI on failure
+    if (liked) { likedPosts.add(postId); } else { likedPosts.delete(postId); }
+    if (btn) {
+      btn.classList.toggle('liked', liked);
+      btn.querySelector('i').className = `ti ti-heart${liked?'-filled':''}`;
+    }
+    toast('Could not update like — try again');
+  }
 }
 
 /* ── submit post ── */
