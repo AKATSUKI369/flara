@@ -1,530 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trends — Flara</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    /* ── Design tokens ── */
-    :root {
-      --bg:        #faf7f4;
-      --surface:   #ffffff;
-      --border:    #ede8e3;
-      --text:      #1e1a17;
-      --muted:     #8a7f78;
-      --accent:    #c96b8a;   /* rose-mauve — Flara brand */
-      --accent2:   #8b6abf;   /* soft violet — secondary */
-      --accent3:   #5ba6c9;   /* steel blue — tertiary */
-      --accent4:   #e8a454;   /* warm amber */
-      --success:   #5cad7e;
-      --radius:    14px;
-      --font:      'Inter', system-ui, sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flara — Trends</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --p:#D4537E; --p50:#FBEAF0; --p100:#F4C0D1; --p600:#993556;
+    --t:#1D9E75; --t50:#E1F5EE; --t100:#9FE1CB;
+    --a:#BA7517; --a50:#FAEEDA; --a100:#FAC775;
+    --v:#8B6ABF; --v50:#F2ECFA; --v100:#D9C9F0;
+    --ink:#1e1510; --ink2:#6b5f55; --ink3:#b0a49c;
+    --cream:#faf7f4; --white:#ffffff;
+    --shadow:0 2px 20px rgba(30,21,16,.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 80px; }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── Topbar ── */
+  .topbar { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--p600); }
+  .signout-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink3); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px; }
+  .signout-btn:hover { color: var(--p); }
 
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+  /* ── Page header ── */
+  .page-header { padding: 20px 20px 0; }
+  .ph-title { font-size: 22px; font-weight: 500; color: var(--ink); line-height: 1.3; }
+  .ph-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
+  .ph-sub { font-size: 13px; color: var(--ink2); margin-top: 4px; }
 
-    /* ── Nav ── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(250,247,244,0.9);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .nav-logo {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: -0.5px;
-    }
-    .nav-links {
-      display: flex;
-      gap: 4px;
-    }
-    .nav-links a {
-      text-decoration: none;
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 500;
-      padding: 6px 14px;
-      border-radius: 8px;
-      transition: all .15s;
-    }
-    .nav-links a:hover { background: var(--border); color: var(--text); }
-    .nav-links a.active { background: var(--accent); color: #fff; }
+  /* ── Layout ── */
+  .cards { padding: 16px 20px 0; display: flex; flex-direction: column; gap: 12px; max-width: 720px; margin: 0 auto; }
+  .card { background: var(--white); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
+  .clabel { font-size: 11px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .chart-sub { font-size: 12px; color: var(--ink2); margin-top: -8px; margin-bottom: 14px; }
 
-    /* ── Layout ── */
-    .page {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 36px 24px 64px;
-    }
+  /* ── Controls ── */
+  .controls-card { display: flex; flex-direction: column; gap: 12px; }
+  .range-row { display: flex; gap: 6px; background: var(--cream); border-radius: 12px; padding: 3px; }
+  .range-btn { flex: 1; border: none; background: transparent; font-size: 12.5px; font-weight: 500; color: var(--ink2); padding: 8px 6px; border-radius: 9px; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .range-btn.active { background: var(--white); color: var(--ink); box-shadow: 0 1px 4px rgba(30,21,16,.1); }
 
-    /* ── Header ── */
-    .page-header {
-      margin-bottom: 28px;
-    }
-    .page-header h1 {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: var(--text);
-    }
-    .page-header p {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 14px;
-    }
+  .metric-select-wrap { display: flex; align-items: center; gap: 10px; }
+  .metric-select-label { font-size: 12px; color: var(--ink2); white-space: nowrap; }
+  .metric-select { flex: 1; font-size: 13px; font-weight: 500; color: var(--ink); background: var(--cream); border: 1px solid rgba(30,21,16,.08); border-radius: 10px; padding: 9px 12px; cursor: pointer; outline: none; font-family: inherit; transition: border-color .15s; }
+  .metric-select:focus { border-color: var(--p); }
 
-    /* ── Controls bar ── */
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-    }
-    .range-btns {
-      display: flex;
-      background: var(--border);
-      border-radius: 10px;
-      padding: 3px;
-      gap: 2px;
-    }
-    .range-btn {
-      border: none;
-      background: transparent;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--muted);
-      padding: 6px 14px;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: all .15s;
-    }
-    .range-btn.active {
-      background: var(--surface);
-      color: var(--text);
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
-    }
-    .metric-select {
-      margin-left: auto;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 14px;
-      cursor: pointer;
-      outline: none;
-      transition: border-color .15s;
-    }
-    .metric-select:focus { border-color: var(--accent); }
+  /* ── Summary cards ── */
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { background: var(--white); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .stat-card.rose::before   { background: var(--p); }
+  .stat-card.teal::before   { background: var(--t); }
+  .stat-card.amber::before  { background: var(--a); }
+  .stat-card.violet::before { background: var(--v); }
+  .stat-card.neutral::before{ background: var(--ink3); }
+  .stat-card.metric-focused { border-color: rgba(30,21,16,.18); box-shadow: 0 4px 20px rgba(30,21,16,.1); }
+  .stat-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink3); margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 500; color: var(--ink); line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--ink2); margin-top: 3px; }
+  .stat-delta { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; margin-top: 6px; padding: 2px 7px; border-radius: 20px; }
+  .stat-delta.up   { background: var(--p50); color: var(--p600); }
+  .stat-delta.down { background: var(--t50); color: #0F6E56; }
+  .stat-delta.flat { background: var(--cream); color: var(--ink3); }
 
-    /* ── Summary cards ── */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-    }
-    .stat-card.rose::before  { background: var(--accent); }
-    .stat-card.violet::before { background: var(--accent2); }
-    .stat-card.blue::before  { background: var(--accent3); }
-    .stat-card.amber::before { background: var(--accent4); }
-    .stat-card.green::before { background: var(--success); }
+  /* ── Insight card ── */
+  .insight-card { background: linear-gradient(135deg, #2a1a20 0%, #1a1510 100%); border-radius: 18px; padding: 18px; display: flex; gap: 14px; align-items: flex-start; }
+  .insight-icon { width: 36px; height: 36px; background: var(--p); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 16px; }
+  .insight-body h3 { font-size: 13px; font-weight: 500; color: var(--p100); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .insight-body p { font-size: 13.5px; color: #f0e8e4; line-height: 1.7; font-family: 'Fraunces', serif; font-style: italic; }
 
-    .stat-label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .6px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -1px;
-      color: var(--text);
-      line-height: 1;
-    }
-    .stat-sub {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .stat-delta {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-top: 6px;
-      padding: 2px 7px;
-      border-radius: 20px;
-    }
-    .stat-delta.up   { background: #fde8ee; color: #c9426a; }
-    .stat-delta.down { background: #e8f7ef; color: #3d9962; }
-    .stat-delta.flat { background: var(--border); color: var(--muted); }
+  /* ── Charts ── */
+  .chart-wrap { position: relative; height: 220px; }
+  .chart-wrap.tall { height: 260px; }
+  .two-col-charts { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  #sleep-chart-card.metric-focused, #symptom-chart-card.metric-focused { border-color: var(--v100); box-shadow: 0 4px 24px rgba(139,106,191,.18); }
 
-    /* ── Chart cards ── */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    @media (max-width: 720px) {
-      .charts-grid { grid-template-columns: 1fr; }
-    }
-    .chart-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-    }
-    .chart-card.full { grid-column: 1 / -1; }
-    .chart-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .chart-sub {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 18px;
-    }
-    .chart-wrap {
-      position: relative;
-      height: 220px;
-    }
-    .chart-wrap.tall { height: 280px; }
+  /* ── Heatmap ── */
+  .heatmap-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .heatmap-grid { display: grid; grid-template-columns: 74px repeat(7, minmax(34px,1fr)); gap: 4px; margin-top: 4px; min-width: 420px; }
+  .hm-label { font-size: 11px; color: var(--ink2); font-weight: 500; display: flex; align-items: center; padding-right: 4px; border-radius: 6px; transition: background .15s; }
+  .hm-label.focused { color: var(--ink); font-weight: 700; background: var(--cream); padding-left: 6px; }
+  .hm-day-label { font-size: 10.5px; color: var(--ink3); text-align: center; }
+  .hm-cell { height: 30px; border-radius: 6px; transition: transform .1s; cursor: default; }
+  .hm-cell:hover { transform: scale(1.08); }
 
-    /* ── Symptom heatmap ── */
-    .heatmap-grid {
-      display: grid;
-      grid-template-columns: 80px repeat(7, 1fr);
-      gap: 4px;
-      margin-top: 8px;
-    }
-    .hm-label {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-    }
-    .hm-day-label {
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-    }
-    .hm-cell {
-      height: 32px;
-      border-radius: 6px;
-      transition: transform .1s;
-      cursor: default;
-      position: relative;
-    }
-    .hm-cell:hover { transform: scale(1.08); }
+  /* ── Log table ── */
+  .log-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .log-table-header h2 { font-size: 13px; font-weight: 500; color: var(--ink); text-transform: uppercase; letter-spacing: .06em; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ink3); padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(30,21,16,.06); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid rgba(30,21,16,.05); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 10px; font-size: 12.5px; color: var(--ink); white-space: nowrap; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 500; }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .btn-mini { font-size: 12px; font-weight: 500; color: var(--p); background: var(--p50); border: none; padding: 7px 14px; border-radius: 10px; cursor: pointer; text-decoration: none; }
 
-    /* ── Correlation insight ── */
-    .insight-card {
-      background: linear-gradient(135deg, #fdf0f5 0%, #f4f0fd 100%);
-      border: 1px solid #e8d8ef;
-      border-radius: var(--radius);
-      padding: 22px 24px;
-      margin-bottom: 28px;
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .insight-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--accent);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: 18px;
-    }
-    .insight-body h3 {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .insight-body p {
-      font-size: 13px;
-      color: #5a4e5e;
-      line-height: 1.6;
-    }
+  /* ── Empty / loading ── */
+  .state-box { text-align: center; padding: 60px 24px; color: var(--ink3); }
+  .state-box .icon { font-size: 34px; margin-bottom: 12px; }
+  .state-box h3 { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 6px; }
+  .state-box p { font-size: 13px; line-height: 1.6; max-width: 300px; margin: 0 auto 20px; color: var(--ink2); }
+  .btn-primary { display: inline-block; background: var(--p); color: #fff; border: none; font-size: 14px; font-weight: 500; padding: 12px 24px; border-radius: 12px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 20px rgba(212,83,126,.25); }
+  .spinner { width: 30px; height: 30px; border: 2.5px solid var(--p100); border-top-color: var(--p); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Log table ── */
-    .log-table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .log-table-header {
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .log-table-header h2 {
-      font-size: 14px;
-      font-weight: 600;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    thead th {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      color: var(--muted);
-      padding: 10px 16px;
-      text-align: left;
-      background: #fafafa;
-      border-bottom: 1px solid var(--border);
-    }
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background .1s;
-    }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: var(--bg); }
-    tbody td {
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--text);
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 9px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
+  /* ── Bottom nav ── */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 0.5px solid rgba(30,21,16,.08); display: flex; padding: 8px 0 4px; z-index: 100; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px; color: var(--ink3); font-size: 10px; font-weight: 500; border: none; background: none; font-family: inherit; transition: color .15s; }
+  .nav-item i { font-size: 20px; }
+  .nav-item.active { color: var(--p); }
+  .nav-fab-wrap { flex: 1; display: flex; justify-content: center; }
+  .nav-fab { width: 46px; height: 46px; border-radius: 50%; background: var(--p); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 22px; margin-top: -18px; box-shadow: 0 4px 16px rgba(212,83,126,.35); transition: opacity .15s; font-family: inherit; }
+  .nav-fab:hover { opacity: .9; }
 
-    /* ── Empty / loading states ── */
-    .state-box {
-      text-align: center;
-      padding: 60px 24px;
-      color: var(--muted);
-    }
-    .state-box .icon { font-size: 36px; margin-bottom: 12px; }
-    .state-box h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-    .state-box p  { font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 20px; }
-    .btn-primary {
-      display: inline-block;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 10px 22px;
-      border-radius: 10px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity .15s;
-    }
-    .btn-primary:hover { opacity: .85; }
+  /* ── Toast ── */
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 12.5px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 999; }
+  #toast.show { opacity: 1; }
 
-    /* ── Spinner ── */
-    .spinner {
-      width: 32px; height: 32px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      margin: 0 auto 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Toast ── */
-    #toast {
-      position: fixed;
-      bottom: 28px; right: 28px;
-      background: var(--text);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 500;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s;
-      z-index: 999;
-    }
-    #toast.show { opacity: 1; }
-  </style>
+  /* ── Responsive ── */
+  @media (min-width: 720px) {
+    .cards { max-width: 900px; }
+    .summary-grid { grid-template-columns: repeat(5, 1fr); }
+    .two-col-charts { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 420px) {
+    .ph-title { font-size: 19px; }
+    .stat-value { font-size: 20px; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <span class="nav-logo">flara</span>
-  <div class="nav-links">
-    <a href="/dashboard">Dashboard</a>
-    <a href="/log">Log</a>
-    <a href="/trends" class="active">Trends</a>
-    <a href="/report">Report</a>
-    <a href="/community">Community</a>
-    <a href="/profile">Profile</a>
+<div class="topbar">
+  <div class="logo">flara</div>
+  <div class="topbar-right">
+    <button class="signout-btn" onclick="signOut()"><i class="ti ti-logout"></i></button>
+    <div class="avatar" id="avatarEl">—</div>
   </div>
-</nav>
+</div>
 
-<!-- MAIN -->
-<main class="page">
+<div class="page-header">
+  <div class="ph-title">Your <em>trends</em></div>
+  <div class="ph-sub" id="header-sub">Loading your symptom history…</div>
+</div>
 
-  <!-- Header -->
-  <div class="page-header">
-    <h1>Your Trends</h1>
-    <p id="header-sub">Loading your symptom history…</p>
-  </div>
+<div id="loading-state" class="state-box">
+  <div class="spinner"></div>
+  <p>Fetching your logs…</p>
+</div>
 
-  <!-- Loading state -->
-  <div id="loading-state" class="state-box">
-    <div class="spinner"></div>
-    <p>Fetching your logs…</p>
-  </div>
+<div id="empty-state" class="state-box" style="display:none">
+  <div class="icon">📈</div>
+  <h3>No logs yet</h3>
+  <p>Start tracking your symptoms daily and your trends will appear here automatically.</p>
+  <a href="/log" class="btn-primary">Log today's symptoms</a>
+</div>
 
-  <!-- Empty state (hidden by default) -->
-  <div id="empty-state" class="state-box" style="display:none">
-    <div class="icon">📈</div>
-    <h3>No logs yet</h3>
-    <p>Start tracking your symptoms daily and your trends will appear here automatically.</p>
-    <a href="/log" class="btn-primary">Log today's symptoms</a>
-  </div>
+<div id="content" style="display:none">
+  <div class="cards">
 
-  <!-- Content (hidden until data loads) -->
-  <div id="content" style="display:none">
-
-    <!-- Range controls -->
-    <div class="controls">
-      <div class="range-btns">
+    <!-- Controls -->
+    <div class="card controls-card">
+      <div class="range-row" id="rangeRow">
         <button class="range-btn" data-days="7">7 days</button>
         <button class="range-btn active" data-days="30">30 days</button>
         <button class="range-btn" data-days="90">3 months</button>
         <button class="range-btn" data-days="180">6 months</button>
       </div>
-      <select class="metric-select" id="metric-select">
-        <option value="pain_level">Pain level</option>
-        <option value="energy_level">Energy</option>
-        <option value="mood">Mood</option>
-        <option value="sleep_hours">Sleep</option>
-      </select>
+      <div class="metric-select-wrap">
+        <span class="metric-select-label">Focus on</span>
+        <select class="metric-select" id="metric-select">
+          <option value="pain_level">Pain level</option>
+          <option value="energy_level">Energy</option>
+          <option value="mood">Mood</option>
+          <option value="sleep_hours">Sleep</option>
+        </select>
+      </div>
     </div>
 
     <!-- Summary stats -->
     <div class="summary-grid" id="summary-grid">
-      <div class="stat-card rose">
+      <div class="stat-card rose" id="card-pain">
         <div class="stat-label">Avg Pain</div>
         <div class="stat-value" id="stat-pain">—</div>
         <div class="stat-sub">out of 10</div>
         <div class="stat-delta flat" id="delta-pain">—</div>
       </div>
-      <div class="stat-card violet">
+      <div class="stat-card teal" id="card-energy">
         <div class="stat-label">Avg Energy</div>
         <div class="stat-value" id="stat-energy">—</div>
         <div class="stat-sub">out of 10</div>
         <div class="stat-delta flat" id="delta-energy">—</div>
       </div>
-      <div class="stat-card blue">
-        <div class="stat-label">Avg Sleep</div>
-        <div class="stat-value" id="stat-sleep">—</div>
-        <div class="stat-sub">hours / night</div>
-        <div class="stat-delta flat" id="delta-sleep">—</div>
-      </div>
-      <div class="stat-card amber">
+      <div class="stat-card amber" id="card-mood">
         <div class="stat-label">Avg Mood</div>
         <div class="stat-value" id="stat-mood">—</div>
         <div class="stat-sub">out of 10</div>
         <div class="stat-delta flat" id="delta-mood">—</div>
       </div>
-      <div class="stat-card green">
+      <div class="stat-card violet" id="card-sleep">
+        <div class="stat-label">Avg Sleep</div>
+        <div class="stat-value" id="stat-sleep">—</div>
+        <div class="stat-sub">hours / night</div>
+        <div class="stat-delta flat" id="delta-sleep">—</div>
+      </div>
+      <div class="stat-card neutral">
         <div class="stat-label">Days Logged</div>
         <div class="stat-value" id="stat-logs">—</div>
         <div class="stat-sub">in this period</div>
       </div>
     </div>
 
-    <!-- AI insight banner -->
+    <!-- AI insight -->
     <div class="insight-card" id="insight-card" style="display:none">
-      <div class="insight-icon">✨</div>
+      <div class="insight-icon"><i class="ti ti-sparkles"></i></div>
       <div class="insight-body">
         <h3>Pattern spotted</h3>
         <p id="insight-text"></p>
       </div>
     </div>
 
-    <!-- Charts row 1 -->
-    <div class="charts-grid">
-      <div class="chart-card full">
-        <div class="chart-title">Daily overview</div>
-        <div class="chart-sub">Pain, energy, and mood over time</div>
-        <div class="chart-wrap tall">
-          <canvas id="chart-overview"></canvas>
-        </div>
+    <!-- Overview chart -->
+    <div class="card">
+      <div class="clabel"><i class="ti ti-chart-line"></i> Daily overview</div>
+      <div class="chart-sub">The line for your selected metric stays bold — the others fade back</div>
+      <div class="chart-wrap tall">
+        <canvas id="chart-overview"></canvas>
       </div>
+    </div>
 
-      <div class="chart-card">
-        <div class="chart-title">Sleep quality</div>
+    <div class="two-col-charts">
+      <div class="card" id="sleep-chart-card">
+        <div class="clabel"><i class="ti ti-moon"></i> Sleep quality</div>
         <div class="chart-sub">Hours of sleep per night</div>
         <div class="chart-wrap">
           <canvas id="chart-sleep"></canvas>
         </div>
       </div>
-
-      <div class="chart-card">
-        <div class="chart-title">Symptom frequency</div>
+      <div class="card" id="symptom-chart-card">
+        <div class="clabel"><i class="ti ti-map-pin"></i> Symptom frequency</div>
         <div class="chart-sub">Days with bloating, headache & brain fog</div>
         <div class="chart-wrap">
           <canvas id="chart-symptoms"></canvas>
@@ -533,25 +258,35 @@
     </div>
 
     <!-- Heatmap -->
-    <div class="chart-card" style="margin-bottom:16px">
-      <div class="chart-title">Weekly symptom heatmap</div>
-      <div class="chart-sub">Average selected metric by day of week over the period</div>
-      <div id="heatmap-container" style="margin-top:12px"></div>
+    <div class="card">
+      <div class="clabel"><i class="ti ti-grid-dots"></i> Weekly symptom heatmap</div>
+      <div class="chart-sub" id="heatmap-sub">Average by day of week — your focused metric is highlighted</div>
+      <div class="heatmap-scroll">
+        <div id="heatmap-container"></div>
+      </div>
     </div>
 
     <!-- Log table -->
-    <div class="log-table-wrap">
+    <div class="card">
       <div class="log-table-header">
         <h2>Log history</h2>
-        <a href="/log" class="btn-primary" style="font-size:13px;padding:8px 16px">+ Log today</a>
+        <a href="/log" class="btn-mini">+ Log today</a>
       </div>
-      <div id="table-content">
+      <div class="table-scroll" id="table-content">
         <div class="state-box"><p>Loading logs…</p></div>
       </div>
     </div>
 
-  </div><!-- /content -->
-</main>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="window.location.href='/dashboard'"><i class="ti ti-home"></i>Home</button>
+  <button class="nav-item active"><i class="ti ti-chart-line"></i>Trends</button>
+  <div class="nav-fab-wrap"><button class="nav-fab" onclick="window.location.href='/log'"><i class="ti ti-plus"></i></button></div>
+  <button class="nav-item" onclick="window.location.href='community.html'"><i class="ti ti-users"></i>Community</button>
+  <button class="nav-item" onclick="window.location.href='profile.html'"><i class="ti ti-user"></i>Profile</button>
+</nav>
 
 <div id="toast"></div>
 
@@ -559,9 +294,7 @@
   /* ───────────── SUPABASE INIT ───────────── */
   const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
-
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
   });
 
@@ -571,6 +304,13 @@
   let activeDays = 30;
   let activeMetric = 'pain_level';
   let charts = {};
+
+  const METRIC_META = {
+    pain_level:   { label: 'Pain',   color: '#D4537E', fill: 'rgba(212,83,126,.12)' },
+    energy_level: { label: 'Energy', color: '#1D9E75', fill: 'rgba(29,158,117,.12)' },
+    mood:         { label: 'Mood',   color: '#BA7517', fill: 'rgba(186,117,23,.12)' },
+    sleep_hours:  { label: 'Sleep',  color: '#8B6ABF', fill: 'rgba(139,106,191,.12)' },
+  };
 
   /* ───────────── HELPERS ───────────── */
   function toast(msg) {
@@ -613,7 +353,14 @@
   async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { window.location.href = '/'; return; }
+    const name = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
+    document.getElementById('avatarEl').textContent = name[0].toUpperCase();
     await loadLogs(session.user.id);
+  }
+
+  async function signOut() {
+    await sb.auth.signOut();
+    window.location.href = '/';
   }
 
   /* ───────────── LOAD DATA ───────────── */
@@ -646,6 +393,7 @@
     renderTable();
     generateInsight();
     updateHeaderSub();
+    highlightFocusedMetric();
   }
 
   function updateHeaderSub() {
@@ -658,7 +406,6 @@
   /* ───────────── STATS ───────────── */
   function updateStats() {
     const curr = filteredLogs;
-    // Previous period (same length before current window)
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - activeDays);
     const prevCutoff = new Date(cutoff);
@@ -686,20 +433,11 @@
   }
 
   /* ───────────── CHARTS ───────────── */
-  const CHART_DEFAULTS = {
-    font: { family: 'Inter, system-ui, sans-serif', size: 12 },
-    color: '#8a7f78',
-  };
-  Chart.defaults.font = CHART_DEFAULTS.font;
-  Chart.defaults.color = CHART_DEFAULTS.color;
+  Chart.defaults.font = { family: "'DM Sans', system-ui, sans-serif", size: 12 };
+  Chart.defaults.color = '#8a7f78';
 
-  function gridOpts() {
-    return { color: '#ede8e3', drawBorder: false };
-  }
-
-  function destroyChart(key) {
-    if (charts[key]) { charts[key].destroy(); delete charts[key]; }
-  }
+  function gridOpts() { return { color: '#ede8e3', drawBorder: false }; }
+  function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
 
   function renderCharts() {
     renderOverviewChart();
@@ -707,63 +445,43 @@
     renderSymptomsChart();
   }
 
+  function dayLabels() {
+    return filteredLogs.map(l => new Date(l.log_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+  }
+
   function renderOverviewChart() {
     destroyChart('overview');
-    const labels = filteredLogs.map(l => {
-      const d = new Date(l.log_date);
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
+    const labels = dayLabels();
+    const keys = ['pain_level', 'energy_level', 'mood'];
 
     charts.overview = new Chart(document.getElementById('chart-overview'), {
       type: 'line',
       data: {
         labels,
-        datasets: [
-          {
-            label: 'Pain',
-            data: filteredLogs.map(l => l.pain_level),
-            borderColor: '#c96b8a',
-            backgroundColor: 'rgba(201,107,138,.1)',
-            borderWidth: 2,
+        datasets: keys.map(key => {
+          const meta = METRIC_META[key];
+          const isFocused = key === activeMetric;
+          return {
+            metricKey: key,
+            label: meta.label,
+            data: filteredLogs.map(l => l[key]),
+            borderColor: isFocused ? meta.color : hexToRgba(meta.color, 0.28),
+            backgroundColor: isFocused ? meta.fill : 'transparent',
+            borderWidth: isFocused ? 3 : 1.5,
             tension: 0.4,
-            pointRadius: filteredLogs.length > 60 ? 0 : 3,
-            fill: true,
-          },
-          {
-            label: 'Energy',
-            data: filteredLogs.map(l => l.energy_level),
-            borderColor: '#8b6abf',
-            backgroundColor: 'transparent',
-            borderWidth: 2,
-            tension: 0.4,
-            pointRadius: filteredLogs.length > 60 ? 0 : 3,
-          },
-          {
-            label: 'Mood',
-            data: filteredLogs.map(l => l.mood),
-            borderColor: '#5ba6c9',
-            backgroundColor: 'transparent',
-            borderWidth: 2,
-            tension: 0.4,
-            pointRadius: filteredLogs.length > 60 ? 0 : 3,
-          },
-        ]
+            pointRadius: filteredLogs.length > 60 ? 0 : (isFocused ? 3 : 2),
+            fill: isFocused,
+            order: isFocused ? 0 : 1,
+          };
+        })
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: {
-            labels: { boxWidth: 12, padding: 16, font: { size: 12 } }
-          },
-          tooltip: {
-            backgroundColor: '#1e1a17',
-            titleColor: '#faf7f4',
-            bodyColor: '#c8bfba',
-            padding: 10,
-            cornerRadius: 8,
-          }
+          legend: { labels: { boxWidth: 12, padding: 16, font: { size: 12 } } },
+          tooltip: { backgroundColor: '#1e1a17', titleColor: '#faf7f4', bodyColor: '#c8bfba', padding: 10, cornerRadius: 8 }
         },
         scales: {
           x: { grid: gridOpts(), ticks: { maxTicksLimit: 10 } },
@@ -773,13 +491,14 @@
     });
   }
 
+  function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
   function renderSleepChart() {
     destroyChart('sleep');
-    const labels = filteredLogs.map(l => {
-      const d = new Date(l.log_date);
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
-
+    const labels = dayLabels();
     charts.sleep = new Chart(document.getElementById('chart-sleep'), {
       type: 'bar',
       data: {
@@ -790,9 +509,9 @@
           backgroundColor: filteredLogs.map(l => {
             const h = l.sleep_hours;
             if (h == null) return '#ede8e3';
-            if (h >= 7) return '#5cad7e';
-            if (h >= 5) return '#e8a454';
-            return '#c96b8a';
+            if (h >= 7) return '#1D9E75';
+            if (h >= 5) return '#BA7517';
+            return '#D4537E';
           }),
           borderRadius: 4,
         }]
@@ -802,17 +521,11 @@
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: {
-            backgroundColor: '#1e1a17',
-            callbacks: {
-              label: ctx => `${ctx.parsed.y} hrs`
-            }
-          }
+          tooltip: { backgroundColor: '#1e1a17', callbacks: { label: ctx => `${ctx.parsed.y} hrs` } }
         },
         scales: {
           x: { grid: gridOpts(), ticks: { maxTicksLimit: 10 } },
-          y: { grid: gridOpts(), min: 0, max: 12, ticks: { stepSize: 2,
-            callback: v => v + 'h' } }
+          y: { grid: gridOpts(), min: 0, max: 12, ticks: { stepSize: 2, callback: v => v + 'h' } }
         }
       }
     });
@@ -821,9 +534,9 @@
   function renderSymptomsChart() {
     destroyChart('symptoms');
     const total = filteredLogs.length || 1;
-    const bloating   = filteredLogs.filter(l => l.bloating).length;
-    const headache   = filteredLogs.filter(l => l.headache).length;
-    const brain_fog  = filteredLogs.filter(l => l.brain_fog).length;
+    const bloating  = filteredLogs.filter(l => l.bloating).length;
+    const headache  = filteredLogs.filter(l => l.headache).length;
+    const brain_fog = filteredLogs.filter(l => l.brain_fog).length;
 
     charts.symptoms = new Chart(document.getElementById('chart-symptoms'), {
       type: 'doughnut',
@@ -831,7 +544,7 @@
         labels: ['Bloating', 'Headache', 'Brain fog'],
         datasets: [{
           data: [bloating, headache, brain_fog],
-          backgroundColor: ['#c96b8a', '#8b6abf', '#5ba6c9'],
+          backgroundColor: ['#D4537E', '#BA7517', '#8B6ABF'],
           borderWidth: 0,
           hoverOffset: 6,
         }]
@@ -841,22 +554,42 @@
         maintainAspectRatio: false,
         cutout: '68%',
         plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { boxWidth: 12, padding: 16 }
-          },
+          legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
           tooltip: {
             backgroundColor: '#1e1a17',
-            callbacks: {
-              label: ctx => {
-                const pct = ((ctx.parsed / total) * 100).toFixed(0);
-                return ` ${ctx.parsed} days (${pct}%)`;
-              }
-            }
+            callbacks: { label: ctx => ` ${ctx.parsed} days (${((ctx.parsed / total) * 100).toFixed(0)}%)` }
           }
         }
       }
     });
+  }
+
+  /* ───────────── METRIC FOCUS ───────────── */
+  function highlightFocusedMetric() {
+    // Overview chart: rebalance line emphasis without a full re-render
+    if (charts.overview) {
+      charts.overview.data.datasets.forEach(ds => {
+        const meta = METRIC_META[ds.metricKey];
+        const isFocused = ds.metricKey === activeMetric;
+        ds.borderColor = isFocused ? meta.color : hexToRgba(meta.color, 0.28);
+        ds.backgroundColor = isFocused ? meta.fill : 'transparent';
+        ds.borderWidth = isFocused ? 3 : 1.5;
+        ds.fill = isFocused;
+        ds.order = isFocused ? 0 : 1;
+      });
+      charts.overview.update();
+    }
+
+    // Stat cards
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('metric-focused'));
+    const cardMap = { pain_level: 'card-pain', energy_level: 'card-energy', mood: 'card-mood', sleep_hours: 'card-sleep' };
+    const focusedCard = document.getElementById(cardMap[activeMetric]);
+    if (focusedCard) focusedCard.classList.add('metric-focused');
+
+    // Sleep card focus ring
+    document.getElementById('sleep-chart-card').classList.toggle('metric-focused', activeMetric === 'sleep_hours');
+
+    renderHeatmap();
   }
 
   /* ───────────── HEATMAP ───────────── */
@@ -867,59 +600,52 @@
     const metricLabels = ['Pain','Energy','Mood','Sleep','Bloating','Headache','Brain fog'];
     const isBool = [false,false,false,false,true,true,true];
 
-    // Bucket logs by day-of-week (0=Mon…6=Sun)
     const buckets = Array.from({length: 7}, () => Array.from({length: metrics.length}, () => []));
     filteredLogs.forEach(l => {
-      const dow = (new Date(l.log_date).getDay() + 6) % 7; // 0=Mon
+      const dow = (new Date(l.log_date).getDay() + 6) % 7;
       metrics.forEach((m, mi) => {
         if (l[m] != null) buckets[dow][mi].push(isBool[mi] ? (l[m] ? 1 : 0) : l[m]);
       });
     });
 
-    // Averages per cell
     const avgs = buckets.map(dow => dow.map(vals => vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null));
 
-    // Color scale
     function cellColor(val, mi) {
       if (val == null) return '#f0ece8';
       if (isBool[mi]) {
-        // binary: 0→green, 1→rose
-        const t = val; // 0–1 freq
-        const r = Math.round(220 + t * (201-220));
-        const g = Math.round(240 + t * (107-240));
-        const b = Math.round(230 + t * (138-230));
+        const r = Math.round(240 - val * 30), g = Math.round(236 - val * 129), b = Math.round(232 - val * 94);
         return `rgb(${r},${g},${b})`;
       }
-      // scale 0–10 (or 0–12 for sleep): low pain→green, high pain→rose; energy→violet; mood→blue; sleep→blue
       const palettes = {
-        pain_level:   ['#d6f0e3','#c96b8a'],
-        energy_level: ['#ede8ef','#8b6abf'],
-        mood:         ['#e8f2f8','#5ba6c9'],
-        sleep_hours:  ['#e8f2f8','#5ba6c9'],
+        pain_level:   ['#f7dde6','#D4537E'],
+        energy_level: ['#dceee5','#1D9E75'],
+        mood:         ['#f6e9d3','#BA7517'],
+        sleep_hours:  ['#e9e1f5','#8B6ABF'],
       };
-      const max = (m => m === 'sleep_hours' ? 10 : 10)(metrics[mi]);
+      const max = 10;
       const t = Math.min(val / max, 1);
-      // interpolate between the two palette colours
-      const p = palettes[metrics[mi]] || ['#ede8e3','#c96b8a'];
+      const p = palettes[metrics[mi]] || ['#ede8e3','#D4537E'];
       const hex2rgb = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
       const [r1,g1,b1] = hex2rgb(p[0]);
       const [r2,g2,b2] = hex2rgb(p[1]);
       return `rgb(${Math.round(r1+(r2-r1)*t)},${Math.round(g1+(g2-g1)*t)},${Math.round(b1+(b2-b1)*t)})`;
     }
 
+    const focusedLabel = METRIC_META[activeMetric]?.label;
+
     let html = `<div class="heatmap-grid">`;
-    // Header row: empty label cell + 7 day labels
     html += `<div></div>`;
     days.forEach(d => { html += `<div class="hm-day-label">${d}</div>`; });
 
-    // Data rows
     metricLabels.forEach((label, mi) => {
-      html += `<div class="hm-label">${label}</div>`;
+      const focused = label === focusedLabel;
+      html += `<div class="hm-label${focused ? ' focused' : ''}">${label}</div>`;
       days.forEach((_, dow) => {
         const val = avgs[dow][mi];
         const color = cellColor(val, mi);
         const tip   = val != null ? val.toFixed(1) : 'No data';
-        html += `<div class="hm-cell" style="background:${color}" title="${label} ${days[dow]}: ${tip}"></div>`;
+        const ring  = focused ? 'box-shadow:inset 0 0 0 2px rgba(30,21,16,.18);' : '';
+        html += `<div class="hm-cell" style="background:${color};${ring}" title="${label} ${days[dow]}: ${tip}"></div>`;
       });
     });
     html += `</div>`;
@@ -927,43 +653,35 @@
   }
 
   /* ───────────── LOG TABLE ───────────── */
-  function levelBadge(val, type) {
+  function levelBadge(val) {
     if (val == null) return '<span style="color:#c8bfba">—</span>';
-    // colour by severity
     const v = Number(val);
-    let bg = '#e8f7ef', dot = '#5cad7e';
-    if (v >= 7) { bg='#fde8ee'; dot='#c96b8a'; }
-    else if (v >= 4) { bg='#fef3e2'; dot='#e8a454'; }
+    let bg = '#E1F5EE', dot = '#1D9E75';
+    if (v >= 7) { bg = '#FBEAF0'; dot = '#D4537E'; }
+    else if (v >= 4) { bg = '#FAEEDA'; dot = '#BA7517'; }
     return `<span class="badge" style="background:${bg}"><span class="badge-dot" style="background:${dot}"></span>${v}</span>`;
   }
 
   function boolBadge(val) {
     if (val == null) return '—';
     return val
-      ? `<span class="badge" style="background:#fde8ee;color:#c96b8a">Yes</span>`
-      : `<span class="badge" style="background:#e8f7ef;color:#3d9962">No</span>`;
+      ? `<span class="badge" style="background:#FBEAF0;color:#D4537E">Yes</span>`
+      : `<span class="badge" style="background:#E1F5EE;color:#0F6E56">No</span>`;
   }
 
   function renderTable() {
     const tc = document.getElementById('table-content');
-    const logs = [...filteredLogs].reverse(); // newest first
+    const logs = [...filteredLogs].reverse();
     if (!logs.length) {
       tc.innerHTML = '<div class="state-box"><p>No logs in this period.</p></div>';
       return;
     }
     let html = `
-      <div style="overflow-x:auto">
       <table>
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Pain</th>
-            <th>Energy</th>
-            <th>Mood</th>
-            <th>Sleep</th>
-            <th>Bloating</th>
-            <th>Headache</th>
-            <th>Brain Fog</th>
+            <th>Date</th><th>Pain</th><th>Energy</th><th>Mood</th><th>Sleep</th>
+            <th>Bloating</th><th>Headache</th><th>Brain Fog</th>
           </tr>
         </thead>
         <tbody>
@@ -972,7 +690,7 @@
       const d = new Date(l.log_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
       html += `
         <tr>
-          <td style="font-weight:500;color:var(--text)">${d}</td>
+          <td style="font-weight:500">${d}</td>
           <td>${levelBadge(l.pain_level)}</td>
           <td>${levelBadge(l.energy_level)}</td>
           <td>${levelBadge(l.mood)}</td>
@@ -982,7 +700,7 @@
           <td>${boolBadge(l.brain_fog)}</td>
         </tr>`;
     });
-    html += '</tbody></table></div>';
+    html += '</tbody></table>';
     tc.innerHTML = html;
   }
 
@@ -994,25 +712,22 @@
 
     const insights = [];
 
-    // Pain vs sleep correlation
     const highPain = filteredLogs.filter(l => l.pain_level >= 6);
     const lowSleep = highPain.filter(l => l.sleep_hours != null && l.sleep_hours < 6);
     if (lowSleep.length / (highPain.length || 1) > 0.5 && highPain.length >= 3) {
       insights.push(`On ${lowSleep.length} of your high-pain days, you slept fewer than 6 hours — poor sleep often amplifies pain. Prioritising sleep on high-risk days may help.`);
     }
 
-    // Most common bad day
     const dowCounts = Array(7).fill(0);
     filteredLogs.filter(l => l.pain_level >= 6).forEach(l => {
       dowCounts[(new Date(l.log_date).getDay() + 6) % 7]++;
     });
     const worstDow = dowCounts.indexOf(Math.max(...dowCounts));
-    const daysArr = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
     if (dowCounts[worstDow] >= 2) {
-      insights.push(`${daysArr[worstDow]}s tend to be your highest-pain days (${dowCounts[worstDow]} times in this period). You might plan lighter activities on ${daysArr[worstDow]}s.`);
+      insights.push(`${days[worstDow]}s tend to be your highest-pain days (${dowCounts[worstDow]} times in this period). You might plan lighter activities on ${days[worstDow]}s.`);
     }
 
-    // Brain fog vs sleep
     const fogDays = filteredLogs.filter(l => l.brain_fog && l.sleep_hours != null);
     const avgFogSleep = fogDays.length ? fogDays.reduce((a,l)=>a+l.sleep_hours,0)/fogDays.length : null;
     if (avgFogSleep != null && avgFogSleep < 6.5) {
@@ -1039,7 +754,7 @@
 
   document.getElementById('metric-select').addEventListener('change', e => {
     activeMetric = e.target.value;
-    renderHeatmap();
+    highlightFocusedMetric();
   });
 
   /* ───────────── BOOT ───────────── */
