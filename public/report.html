@@ -235,19 +235,8 @@ function generatePDF() {
         }
       }
 
-      /* Vector redraw of the app's logomark (teardrop + stem) — no bg box, just the icon */
-      function drawLogomark(x, y0, s, color) {
-        const cx = x + s / 2, cy = y0 + s / 2;
-        const r = s * 0.2;
-        setFill(color);
-        doc.triangle(cx, cy - r * 2.0, cx - r * 1.05, cy - r * 0.1, cx + r * 1.05, cy - r * 0.1, 'F');
-        doc.ellipse(cx, cy + r * 0.4, r * 1.1, r * 1.3, 'F');
-        setDraw(color);
-        doc.setLineWidth(s * 0.06);
-        doc.line(cx, cy + r * 1.6, cx, cy + r * 2.2);
-      }
-
-      /* wordmark: serif, non-italic (matches site's Fraunces logo, not italicized) */
+      /* wordmark: serif, non-italic (matches site's Fraunces logo — text only, no icon,
+         consistent with dashboard/log/trends/community/profile which never show the icon mark) */
       function wordmark(x, baseline, size, color) {
         doc.setFont('times', 'normal');
         doc.setFontSize(size);
@@ -257,8 +246,7 @@ function generatePDF() {
       }
 
       function brandStrip() {
-        drawLogomark(margin, 7, 6.5, C.rose);
-        wordmark(margin + 8, 13.5, 12, C.rose);
+        wordmark(margin, 14, 13, C.rose);
         setDraw(C.border);
         doc.setLineWidth(0.3);
         doc.line(margin, 19, pageW - margin, 19);
@@ -289,8 +277,7 @@ function generatePDF() {
       setFill(C.rose);
       doc.rect(0, headerH, pageW, 0.9, 'F');
 
-      drawLogomark(margin, 6, 11, C.white);
-      wordmark(margin + 13, 20, 25, C.white);
+      wordmark(margin, 21, 26, C.white);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
@@ -551,14 +538,28 @@ function generatePDF() {
       ensureSpace(30);
       sectionTitle('Daily log', C.rose);
 
+      // Column layout: fixed widths summing to contentW, so header labels and
+      // data values share the same centered anchor per column instead of both
+      // being left-aligned at mismatched positions.
+      const cols = [
+        { label: 'DATE', x: margin, w: 42, align: 'left' },
+        { label: 'PAIN', x: margin + 42, w: 26, align: 'center' },
+        { label: 'ENERGY', x: margin + 68, w: 30, align: 'center' },
+        { label: 'SLEEP', x: margin + 98, w: 28, align: 'center' },
+        { label: 'CYCLE DAY', x: margin + 126, w: 48, align: 'center' },
+      ];
+      function cellText(col, text, yPos) {
+        if (col.align === 'center') {
+          doc.text(text, col.x + col.w / 2, yPos, { align: 'center' });
+        } else {
+          doc.text(text, col.x + 4, yPos);
+        }
+      }
+
       setFill(C.ink);
       doc.roundedRect(margin, y, contentW, 8, 1.5, 1.5, 'F');
       doc.setFontSize(7); setText([245, 240, 236]);
-      doc.text('DATE', margin + 4, y + 5.5);
-      doc.text('PAIN', margin + 52, y + 5.5);
-      doc.text('ENERGY', margin + 78, y + 5.5);
-      doc.text('SLEEP', margin + 108, y + 5.5);
-      doc.text('CYCLE DAY', margin + 134, y + 5.5);
+      cols.forEach(col => cellText(col, col.label, y + 5.5));
       y += 10;
 
       doc.setFontSize(8.3);
@@ -569,14 +570,16 @@ function generatePDF() {
           doc.rect(margin, y - 4.5, contentW, 7, 'F');
         }
         setText([55, 46, 40]);
-        doc.text(l.log_date, margin + 4, y);
+        cellText(cols[0], l.log_date, y);
+
         const pc = l.pain_level >= 7 ? C.roseDeep : l.pain_level >= 4 ? [186, 117, 23] : [29, 158, 117];
         setText(pc);
-        doc.text(String(l.pain_level ?? '-'), margin + 52, y);
+        cellText(cols[1], String(l.pain_level ?? '-'), y);
+
         setText([55, 46, 40]);
-        doc.text(String(l.energy_level ?? '-'), margin + 78, y);
-        doc.text(l.sleep_hours ? l.sleep_hours + 'h' : '-', margin + 108, y);
-        doc.text(l.cycle_day ? 'Day ' + l.cycle_day : '-', margin + 134, y);
+        cellText(cols[2], String(l.energy_level ?? '-'), y);
+        cellText(cols[3], l.sleep_hours ? l.sleep_hours + 'h' : '-', y);
+        cellText(cols[4], l.cycle_day ? 'Day ' + l.cycle_day : '-', y);
         y += 7;
       });
 
@@ -586,10 +589,9 @@ function generatePDF() {
         doc.setPage(p);
         setDraw(C.border); doc.setLineWidth(0.2);
         doc.line(margin, pageH - 16, pageW - margin, pageH - 16);
-        drawLogomark(margin, pageH - 13.5, 4.5, C.rose);
-        wordmark(margin + 6, pageH - 10, 8.5, C.rose);
+        wordmark(margin, pageH - 10, 9, C.rose);
         doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); setText(C.ink3);
-        doc.text('This report summarizes self-reported data and is not a medical diagnosis.', margin + 18, pageH - 10);
+        doc.text('This report summarizes self-reported data and is not a medical diagnosis.', margin + 14, pageH - 10);
         doc.text(`page ${p} of ${pageCount}`, pageW - margin - 20, pageH - 10);
       }
 
