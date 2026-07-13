@@ -114,7 +114,7 @@
 
   <div class="pro-banner">
     <div class="pro-label"><i class="ti ti-sparkles"></i> What's included</div>
-    <div class="pro-text">A polished, doctor-ready PDF with your pain, energy & mood trends, a pain-by-cycle-day correlation view, your written notes, medication-relevant symptom frequency, and your full daily log — all from your real logged data.</div>
+    <div class="pro-text">A polished, doctor-ready PDF with a written summary, pain/energy/mood trends, a pain-by-cycle-day correlation view, your notes, symptom frequency, and your full daily log — all from your real logged data.</div>
   </div>
 
 </div>
@@ -211,14 +211,13 @@ function generatePDF() {
       const C = {
         ink: [30, 21, 16], ink2: [107, 95, 85], ink3: [176, 164, 156],
         cream: [250, 247, 244], white: [255, 255, 255],
-        rose: [212, 83, 126], roseDeep: [153, 53, 86],
+        rose: [212, 83, 126], roseDeep: [153, 53, 86], roseLight: [251, 234, 240],
         plum: [38, 24, 30],
         teal: [29, 158, 117], tealLight: [225, 245, 238],
         amber: [214, 148, 66],
         violet: [139, 106, 191], violetLight: [238, 233, 245],
         blue: [91, 166, 201],
-        border: [235, 225, 220],
-        danger: [163, 45, 45]
+        border: [235, 225, 220]
       };
 
       const setFill = c => doc.setFillColor(c[0], c[1], c[2]);
@@ -236,14 +235,33 @@ function generatePDF() {
         }
       }
 
+      /* Vector redraw of the app's logomark (teardrop + stem) — no bg box, just the icon */
+      function drawLogomark(x, y0, s, color) {
+        const cx = x + s / 2, cy = y0 + s / 2;
+        const r = s * 0.2;
+        setFill(color);
+        doc.triangle(cx, cy - r * 2.0, cx - r * 1.05, cy - r * 0.1, cx + r * 1.05, cy - r * 0.1, 'F');
+        doc.ellipse(cx, cy + r * 0.4, r * 1.1, r * 1.3, 'F');
+        setDraw(color);
+        doc.setLineWidth(s * 0.06);
+        doc.line(cx, cy + r * 1.6, cx, cy + r * 2.2);
+      }
+
+      /* wordmark: serif, non-italic (matches site's Fraunces logo, not italicized) */
+      function wordmark(x, baseline, size, color) {
+        doc.setFont('times', 'normal');
+        doc.setFontSize(size);
+        setText(color);
+        doc.text('flara', x, baseline);
+        doc.setFont('helvetica', 'normal');
+      }
+
       function brandStrip() {
-        doc.setFont('helvetica', 'italic');
-        doc.setFontSize(13);
-        setText(C.rose);
-        doc.text('flara', margin, 16);
+        drawLogomark(margin, 7, 6.5, C.rose);
+        wordmark(margin + 8, 13.5, 12, C.rose);
         setDraw(C.border);
         doc.setLineWidth(0.3);
-        doc.line(margin, 20, pageW - margin, 20);
+        doc.line(margin, 19, pageW - margin, 19);
       }
 
       function ensureSpace(h) {
@@ -257,8 +275,8 @@ function generatePDF() {
       function sectionTitle(text, dotColor) {
         setFill(dotColor || C.rose);
         doc.circle(margin + 1.1, y - 1.6, 1.1, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11.5);
+        doc.setFont('times', 'bold');
+        doc.setFontSize(12.5);
         setText(C.ink);
         doc.text(text, margin + 5.5, y);
         doc.setFont('helvetica', 'normal');
@@ -266,20 +284,18 @@ function generatePDF() {
       }
 
       /* ================= HEADER ================= */
-      const headerH = 40;
+      const headerH = 42;
       vGradient(0, 0, pageW, headerH, C.plum, C.roseDeep, 60);
       setFill(C.rose);
       doc.rect(0, headerH, pageW, 0.9, 'F');
 
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(24);
-      setText(C.white);
-      doc.text('flara', margin, 20);
+      drawLogomark(margin, 6, 11, C.white);
+      wordmark(margin + 13, 20, 25, C.white);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       setText([232, 205, 214]);
-      doc.text('S Y M P T O M   T R A C K I N G   R E P O R T', margin, 28);
+      doc.text('S Y M P T O M   T R A C K I N G   R E P O R T', margin, 30);
 
       doc.setFontSize(7.5);
       setText([232, 205, 214]);
@@ -314,11 +330,37 @@ function generatePDF() {
       doc.setFontSize(7); setText(C.ink3);
       doc.text(`${currentLogs.length} days logged`, margin + 8 + colW * 2, y + 21);
 
-      y += infoH + 14;
+      y += infoH + 12;
+
+      /* ============= EXECUTIVE SUMMARY ============= */
+      const avgPainNum = currentLogs.reduce((s, l) => s + (l.pain_level || 0), 0) / currentLogs.length;
+      const avgEnergyNum = currentLogs.reduce((s, l) => s + (l.energy_level || 0), 0) / currentLogs.length;
+      const avgSleepNum = currentLogs.reduce((s, l) => s + (l.sleep_hours || 0), 0) / currentLogs.length;
+      const worstDay = [...currentLogs].sort((a, b) => b.pain_level - a.pain_level)[0];
+
+      let trendClause = 'held roughly steady across the period';
+      if (currentLogs.length >= 6) {
+        const mid = Math.floor(currentLogs.length / 2);
+        const firstHalf = currentLogs.slice(0, mid);
+        const secondHalf = currentLogs.slice(mid);
+        const fAvg = firstHalf.reduce((s, l) => s + (l.pain_level || 0), 0) / firstHalf.length;
+        const sAvg = secondHalf.reduce((s, l) => s + (l.pain_level || 0), 0) / secondHalf.length;
+        if (sAvg - fAvg >= 0.7) trendClause = 'trended upward through the period';
+        else if (fAvg - sAvg >= 0.7) trendClause = 'trended downward through the period';
+      }
+
+      const summaryText = `Over the ${currentLogs.length}-day period from ${startDate} to ${endDate}, pain averaged ${avgPainNum.toFixed(1)}/10 and ${trendClause}, while energy averaged ${avgEnergyNum.toFixed(1)}/10 on ${avgSleepNum.toFixed(1)} hours of sleep per night. The most difficult day was ${worstDay.log_date}, with pain reaching ${worstDay.pain_level}/10.`;
+
+      doc.setFont('times', 'italic');
+      doc.setFontSize(10.5);
+      setText(C.ink2);
+      const summaryLines = doc.splitTextToSize(summaryText, contentW - 4);
+      doc.text(summaryLines, margin, y + 5);
+      doc.setFont('helvetica', 'normal');
+      y += summaryLines.length * 5.6 + 12;
 
       /* ============= STAT CARDS ============= */
       const avg = key => (currentLogs.reduce((s, l) => s + (l[key] || 0), 0) / currentLogs.length).toFixed(1);
-      const worstDay = [...currentLogs].sort((a, b) => b.pain_level - a.pain_level)[0];
       const statH = 28;
       const gap = 3;
       const cardW = (contentW - gap * 3) / 4;
@@ -326,7 +368,7 @@ function generatePDF() {
         { label: 'AVG PAIN', val: avg('pain_level') + '/10', sub: `${currentLogs.length}-day average`, color: C.rose },
         { label: 'AVG ENERGY', val: avg('energy_level') + '/10', sub: 'higher is better', color: C.violet },
         { label: 'AVG SLEEP', val: avg('sleep_hours') + 'h', sub: 'per night', color: C.blue },
-        { label: 'WORST PAIN', val: worstDay.pain_level + '/10', sub: worstDay.log_date, color: C.danger },
+        { label: 'WORST PAIN', val: worstDay.pain_level + '/10', sub: worstDay.log_date, color: C.roseDeep },
       ];
       stats.forEach((s, i) => {
         const x = margin + i * (cardW + gap);
@@ -344,7 +386,7 @@ function generatePDF() {
       y += statH + 14;
 
       /* ============= TRENDS CHART ============= */
-      ensureSpace(48);
+      ensureSpace(50);
       sectionTitle('Symptom trends over time');
 
       const legendItems = [
@@ -361,7 +403,7 @@ function generatePDF() {
       });
       y += 6;
 
-      const chartH = 32;
+      const chartH = 34;
       setFill(C.cream); setDraw(C.border);
       doc.roundedRect(margin, y, contentW, chartH, 2, 2, 'FD');
       setDraw([236, 227, 222]); doc.setLineWidth(0.15);
@@ -369,27 +411,47 @@ function generatePDF() {
         const gy2 = y + chartH - (chartH * i / 4);
         doc.line(margin + 4, gy2, margin + contentW - 4, gy2);
       }
-      function plotLine(data, color) {
+
+      const chartBottom = y + chartH - 4;
+      function toXY(pts, i, stepX) {
+        return [margin + 5 + i * stepX, chartBottom - (pts[i] / 10) * (chartH - 8)];
+      }
+
+      // hero area-fill for pain (primary metric)
+      const painPts = currentLogs.map(l => l.pain_level).slice(-30);
+      if (painPts.length > 1) {
+        const stepX = (contentW - 10) / (painPts.length - 1);
+        setFill(C.roseLight);
+        for (let i = 0; i < painPts.length - 1; i++) {
+          if (painPts[i] == null || painPts[i + 1] == null) continue;
+          const [x1, y1] = toXY(painPts, i, stepX);
+          const [x2, y2] = toXY(painPts, i + 1, stepX);
+          doc.triangle(x1, chartBottom, x1, y1, x2, y2, 'F');
+          doc.triangle(x1, chartBottom, x2, y2, x2, chartBottom, 'F');
+        }
+      }
+
+      function plotLine(data, color, width) {
         const pts = data.slice(-30);
         if (pts.length < 2) return;
         const stepX = (contentW - 10) / (pts.length - 1);
-        setDraw(color); doc.setLineWidth(0.6);
+        setDraw(color); doc.setLineWidth(width || 0.6);
         for (let i = 0; i < pts.length - 1; i++) {
           if (pts[i] == null || pts[i + 1] == null) continue;
-          const x1 = margin + 5 + i * stepX, y1 = y + chartH - 4 - (pts[i] / 10) * (chartH - 8);
-          const x2 = margin + 5 + (i + 1) * stepX, y2 = y + chartH - 4 - (pts[i + 1] / 10) * (chartH - 8);
+          const [x1, y1] = toXY(pts, i, stepX);
+          const [x2, y2] = toXY(pts, i + 1, stepX);
           doc.line(x1, y1, x2, y2);
         }
         setFill(color);
         pts.forEach((v, i) => {
           if (v == null) return;
-          const px = margin + 5 + i * stepX, py = y + chartH - 4 - (v / 10) * (chartH - 8);
-          doc.circle(px, py, 0.75, 'F');
+          const [px, py] = toXY(pts, i, stepX);
+          doc.circle(px, py, 0.7, 'F');
         });
       }
-      plotLine(currentLogs.map(l => l.pain_level), C.rose);
-      plotLine(currentLogs.map(l => l.energy_level), C.violet);
-      plotLine(currentLogs.map(l => l.mood), C.blue);
+      plotLine(currentLogs.map(l => l.energy_level), C.violet, 0.55);
+      plotLine(currentLogs.map(l => l.mood), C.blue, 0.55);
+      plotLine(currentLogs.map(l => l.pain_level), C.rose, 0.85);
 
       doc.setFontSize(6.5); setText(C.ink3);
       doc.text(startDate, margin + 4, y + chartH + 5);
@@ -431,7 +493,7 @@ function generatePDF() {
         });
         y += cChartH + 6;
 
-        doc.setFont('helvetica', 'italic'); doc.setFontSize(8.5); setText(C.ink2);
+        doc.setFont('times', 'italic'); doc.setFontSize(9); setText(C.ink2);
         doc.text(`Pain tends to peak around cycle day ${peakDay} (avg ${cAvgs[peakIdx].toFixed(1)}/10) in this period.`, margin, y);
         doc.setFont('helvetica', 'normal');
         y += 12;
@@ -477,7 +539,7 @@ function generatePDF() {
           doc.roundedRect(margin, y, 1.6, cardH, 0.8, 0.8, 'F');
           doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); setText(C.teal);
           doc.text(l.log_date, margin + 6, y + 6);
-          doc.setFont('helvetica', 'italic'); doc.setFontSize(8); setText(C.ink2);
+          doc.setFont('times', 'italic'); doc.setFontSize(8.5); setText(C.ink2);
           doc.text(noteLines, margin + 6, y + 11);
           doc.setFont('helvetica', 'normal');
           y += cardH + 4;
@@ -508,7 +570,7 @@ function generatePDF() {
         }
         setText([55, 46, 40]);
         doc.text(l.log_date, margin + 4, y);
-        const pc = l.pain_level >= 7 ? C.danger : l.pain_level >= 4 ? [186, 117, 23] : [29, 158, 117];
+        const pc = l.pain_level >= 7 ? C.roseDeep : l.pain_level >= 4 ? [186, 117, 23] : [29, 158, 117];
         setText(pc);
         doc.text(String(l.pain_level ?? '-'), margin + 52, y);
         setText([55, 46, 40]);
@@ -524,10 +586,10 @@ function generatePDF() {
         doc.setPage(p);
         setDraw(C.border); doc.setLineWidth(0.2);
         doc.line(margin, pageH - 16, pageW - margin, pageH - 16);
-        doc.setFont('helvetica', 'italic'); doc.setFontSize(8); setText(C.rose);
-        doc.text('flara', margin, pageH - 10);
+        drawLogomark(margin, pageH - 13.5, 4.5, C.rose);
+        wordmark(margin + 6, pageH - 10, 8.5, C.rose);
         doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); setText(C.ink3);
-        doc.text('This report summarizes self-reported data and is not a medical diagnosis.', margin + 12, pageH - 10);
+        doc.text('This report summarizes self-reported data and is not a medical diagnosis.', margin + 18, pageH - 10);
         doc.text(`page ${p} of ${pageCount}`, pageW - margin - 20, pageH - 10);
       }
 
