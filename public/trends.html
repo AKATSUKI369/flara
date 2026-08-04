@@ -353,7 +353,19 @@
   async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { window.location.href = '/'; return; }
-    const name = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
+
+    // profiles.name is the source of truth (editable on the Profile tab).
+    // user_metadata.full_name is only the Google name captured at sign-in
+    // and never changes afterward, which is why edited names looked stuck.
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('name')
+      .eq('id', session.user.id)
+      .single();
+
+    const name = profile?.name?.split(' ')[0]
+      || session.user.user_metadata?.full_name?.split(' ')[0]
+      || 'there';
     document.getElementById('avatarEl').textContent = name[0].toUpperCase();
     await loadLogs(session.user.id);
   }

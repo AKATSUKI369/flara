@@ -616,9 +616,12 @@ function generatePDF() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { window.location.href = '/'; return; }
   userId = session.user.id;
-  userName = session.user.user_metadata?.full_name || '';
 
-  const { data: profile } = await sb.from('profiles').select('condition').eq('id', userId).single();
+  // profiles.name is the source of truth (editable on the Profile tab).
+  // user_metadata.full_name is only the Google name captured at sign-in
+  // and never changes afterward, which is why the PDF kept showing an old name.
+  const { data: profile } = await sb.from('profiles').select('name, condition').eq('id', userId).single();
+  userName = profile?.name || session.user.user_metadata?.full_name || '';
   if (profile?.condition) userCondition = profile.condition;
 
   loadLogs();

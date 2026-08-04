@@ -363,7 +363,19 @@ async function loadDashboard() {
   if (!session) { window.location.href = '/'; return; }
 
   const user = session.user;
-  const name = user.user_metadata?.full_name?.split(' ')[0] || 'there';
+
+  // profiles.name is the source of truth (editable on the Profile tab).
+  // user_metadata.full_name is only the Google name captured at sign-in and
+  // never changes afterward, which is why edited names looked stuck here.
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('name')
+    .eq('id', user.id)
+    .single();
+
+  const name = profile?.name?.split(' ')[0]
+    || user.user_metadata?.full_name?.split(' ')[0]
+    || 'there';
 
   document.getElementById('greetingEl').innerHTML =
     getGreeting() + ',<br><em>' + name + '</em>';
