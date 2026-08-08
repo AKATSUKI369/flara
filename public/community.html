@@ -167,7 +167,8 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
 });
 
-let userId = null, userDisplayName = '', userCondition = 'pcos';
+// line 170 — add the new variable
+let userId = null, userDisplayName = '', userAnonHandle = '', userCondition = 'pcos';
 let allPosts = [], allReplies = {}, likedPosts = new Set(), activeFilter = 'all';
 
 /* ── helpers ── */
@@ -321,7 +322,7 @@ async function submitReply(postId) {
 
   const { data, error } = await sb.from('community_replies').insert({
     post_id: postId,
-    user_id: userId,
+    author_name: userAnonHandle,
     author_name: userDisplayName,
     content
   }).select().single();
@@ -424,7 +425,7 @@ async function submitPost() {
   btn.disabled = true; btn.textContent = 'Posting…';
 
   const { data, error } = await sb.from('community_posts').insert({
-    user_id: userId,
+    author_name: userAnonHandle,
     author_name: userDisplayName,
     condition: userCondition,
     content,
@@ -467,9 +468,9 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   if (!session) { window.location.href = '/'; return; }
   userId = session.user.id;
 
-  const { data: profile } = await sb.from('profiles').select('name, condition').eq('id', userId).single();
+  const { data: profile } = await sb.from('profiles').select('name, condition, anon_handle').eq('id', userId).single();
   userDisplayName = profile?.name || session.user.user_metadata?.full_name || 'Anonymous';
-  userCondition   = profile?.condition || 'pcos';
+  userAnonHandle  = profile?.anon_handle || 'Flara Member';
 
   const ini = initials(userDisplayName);
   document.getElementById('composeAvatar').textContent = ini;
