@@ -487,17 +487,25 @@ function generatePDF() {
       }
 
       /* ============= SYMPTOM FREQUENCY ============= */
-      ensureSpace(40);
-      sectionTitle('Most reported symptoms', C.amber);
-
       const symptomDefs = [
         { key: 'bloating', label: 'Bloating' },
         { key: 'headache', label: 'Headache' },
         { key: 'brain_fog', label: 'Brain fog' },
-      ];
+        { key: 'cramps', label: 'Cramps' },
+        { key: 'nausea', label: 'Nausea' },
+        { key: 'fatigue', label: 'Fatigue' },
+        { key: 'acne', label: 'Acne' },
+        { key: 'anxiety', label: 'Anxiety' },
+        { key: 'hot_flash', label: 'Hot flashes' },
+      ]
+        .map(s => ({ ...s, count: currentLogs.filter(l => l[s.key]).length }))
+        .sort((a, b) => b.count - a.count);
+
+      ensureSpace(symptomDefs.length * 9 + 16);
+      sectionTitle('Most reported symptoms', C.amber);
+
       symptomDefs.forEach((s, i) => {
-        const count = currentLogs.filter(l => l[s.key]).length;
-        const pct = currentLogs.length ? count / currentLogs.length : 0;
+        const pct = currentLogs.length ? s.count / currentLogs.length : 0;
         const ry = y + i * 9;
         doc.setFontSize(8.5); setText(C.ink);
         doc.text(s.label, margin, ry + 4);
@@ -507,7 +515,7 @@ function generatePDF() {
         setFill(C.amber);
         doc.roundedRect(barX, ry, Math.max(barW * pct, 1.2), 3, 1.2, 1.2, 'F');
         doc.setFontSize(7.5); setText(C.ink2);
-        doc.text(`${count} of ${currentLogs.length}`, barX + barW + 4, ry + 3.2);
+        doc.text(`${s.count} of ${currentLogs.length}`, barX + barW + 4, ry + 3.2);
       });
       y += symptomDefs.length * 9 + 10;
 

@@ -248,10 +248,10 @@
           <canvas id="chart-sleep"></canvas>
         </div>
       </div>
-      <div class="card" id="symptom-chart-card">
+      <div class="card" id="symptom-chart-card" style="grid-column:1/-1">
         <div class="clabel"><i class="ti ti-map-pin"></i> Symptom frequency</div>
-        <div class="chart-sub">Days with bloating, headache & brain fog</div>
-        <div class="chart-wrap">
+        <div class="chart-sub">All 9 tracked symptoms, ranked by how often they show up</div>
+        <div class="chart-wrap" style="height:320px">
           <canvas id="chart-symptoms"></canvas>
         </div>
       </div>
@@ -546,31 +546,45 @@
   function renderSymptomsChart() {
     destroyChart('symptoms');
     const total = filteredLogs.length || 1;
-    const bloating  = filteredLogs.filter(l => l.bloating).length;
-    const headache  = filteredLogs.filter(l => l.headache).length;
-    const brain_fog = filteredLogs.filter(l => l.brain_fog).length;
+    const defs = [
+      { key: 'bloating',  label: 'Bloating' },
+      { key: 'headache',  label: 'Headache' },
+      { key: 'brain_fog', label: 'Brain fog' },
+      { key: 'cramps',    label: 'Cramps' },
+      { key: 'nausea',    label: 'Nausea' },
+      { key: 'fatigue',   label: 'Fatigue' },
+      { key: 'acne',      label: 'Acne' },
+      { key: 'anxiety',   label: 'Anxiety' },
+      { key: 'hot_flash', label: 'Hot flashes' },
+    ]
+      .map(s => ({ ...s, count: filteredLogs.filter(l => l[s.key]).length }))
+      .sort((a, b) => b.count - a.count); // index 0 renders at top for horizontal bars
 
     charts.symptoms = new Chart(document.getElementById('chart-symptoms'), {
-      type: 'doughnut',
+      type: 'bar',
       data: {
-        labels: ['Bloating', 'Headache', 'Brain fog'],
+        labels: defs.map(s => s.label),
         datasets: [{
-          data: [bloating, headache, brain_fog],
-          backgroundColor: ['#D4537E', '#BA7517', '#8B6ABF'],
-          borderWidth: 0,
-          hoverOffset: 6,
+          data: defs.map(s => s.count),
+          backgroundColor: '#D4537E',
+          borderRadius: 4,
+          barThickness: 14,
         }]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '68%',
         plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
+          legend: { display: false },
           tooltip: {
             backgroundColor: '#1e1a17',
-            callbacks: { label: ctx => ` ${ctx.parsed} days (${((ctx.parsed / total) * 100).toFixed(0)}%)` }
+            callbacks: { label: ctx => ` ${ctx.parsed.x} days (${((ctx.parsed.x / total) * 100).toFixed(0)}%)` }
           }
+        },
+        scales: {
+          x: { grid: gridOpts(), ticks: { precision: 0 } },
+          y: { grid: { display: false }, ticks: { font: { size: 11 } } }
         }
       }
     });
@@ -608,9 +622,9 @@
   function renderHeatmap() {
     const container = document.getElementById('heatmap-container');
     const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    const metrics = ['pain_level','energy_level','mood','sleep_hours','bloating','headache','brain_fog'];
-    const metricLabels = ['Pain','Energy','Mood','Sleep','Bloating','Headache','Brain fog'];
-    const isBool = [false,false,false,false,true,true,true];
+    const metrics = ['pain_level','energy_level','mood','sleep_hours','bloating','headache','brain_fog','cramps','nausea','fatigue','acne','anxiety','hot_flash'];
+    const metricLabels = ['Pain','Energy','Mood','Sleep','Bloating','Headache','Brain fog','Cramps','Nausea','Fatigue','Acne','Anxiety','Hot flashes'];
+    const isBool = [false,false,false,false,true,true,true,true,true,true,true,true,true];
 
     const buckets = Array.from({length: 7}, () => Array.from({length: metrics.length}, () => []));
     filteredLogs.forEach(l => {
@@ -681,6 +695,16 @@
       : `<span class="badge" style="background:#E1F5EE;color:#0F6E56">No</span>`;
   }
 
+  const SYMPTOM_COLS = [
+    ['bloating','Bloating'], ['headache','Headache'], ['brain_fog','Brain fog'],
+    ['cramps','Cramps'], ['nausea','Nausea'], ['fatigue','Fatigue'],
+    ['acne','Acne'], ['anxiety','Anxiety'], ['hot_flash','Hot flashes']
+  ];
+  function symptomList(l) {
+    const active = SYMPTOM_COLS.filter(([k]) => l[k]).map(([,label]) => label);
+    return active.length ? active.join(', ') : '<span style="color:#c8bfba">—</span>';
+  }
+
   function renderTable() {
     const tc = document.getElementById('table-content');
     const logs = [...filteredLogs].reverse();
@@ -693,7 +717,7 @@
         <thead>
           <tr>
             <th>Date</th><th>Pain</th><th>Energy</th><th>Mood</th><th>Sleep</th>
-            <th>Bloating</th><th>Headache</th><th>Brain Fog</th>
+            <th>Symptoms</th>
           </tr>
         </thead>
         <tbody>
@@ -707,9 +731,7 @@
           <td>${levelBadge(l.energy_level)}</td>
           <td>${levelBadge(l.mood)}</td>
           <td>${l.sleep_hours != null ? l.sleep_hours + 'h' : '—'}</td>
-          <td>${boolBadge(l.bloating)}</td>
-          <td>${boolBadge(l.headache)}</td>
-          <td>${boolBadge(l.brain_fog)}</td>
+          <td style="font-size:12px">${symptomList(l)}</td>
         </tr>`;
     });
     html += '</tbody></table>';
