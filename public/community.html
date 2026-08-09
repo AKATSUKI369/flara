@@ -167,7 +167,6 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
 });
 
-// line 170 — add the new variable
 let userId = null, userDisplayName = '', userAnonHandle = '', userCondition = 'pcos';
 let allPosts = [], allReplies = {}, likedPosts = new Set(), activeFilter = 'all';
 
@@ -323,7 +322,6 @@ async function submitReply(postId) {
   const { data, error } = await sb.from('community_replies').insert({
     post_id: postId,
     author_name: userAnonHandle,
-    author_name: userDisplayName,
     content
   }).select().single();
 
@@ -426,15 +424,14 @@ async function submitPost() {
 
   const { data, error } = await sb.from('community_posts').insert({
     author_name: userAnonHandle,
-    author_name: userDisplayName,
     condition: userCondition,
     content,
     likes: 0
   }).select().single();
 
-  btn.disabled = true; btn.textContent = 'Post';
+  btn.disabled = false; btn.textContent = 'Post';
 
-  if (error) { toast('Something went wrong'); btn.disabled = false; return; }
+  if (error) { toast('Something went wrong'); return; }
 
   allReplies[data.id] = [];
   allPosts.unshift(data);
