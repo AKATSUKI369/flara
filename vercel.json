@@ -7,6 +7,8 @@
     { "source": "/report", "destination": "/report.html" },
     { "source": "/trends", "destination": "/trends.html" },
     { "source": "/community", "destination": "/community.html" },
-    { "source": "/profile", "destination": "/profile.html" }
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" }
   ]
 }

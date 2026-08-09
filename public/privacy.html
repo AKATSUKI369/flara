@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Flara</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --p:#D4537E; --p50:#FBEAF0; --p100:#F4C0D1; --p600:#993556;
+    --t:#1D9E75; --t50:#E1F5EE;
+    --ink:#1e1510; --ink2:#6b5f55; --ink3:#b0a49c;
+    --cream:#faf7f4; --white:#ffffff;
+    --shadow:0 2px 20px rgba(30,21,16,.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 60px; }
+
+  .topbar { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; max-width: 680px; margin: 0 auto; }
+  .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
+  .close-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid rgba(30,21,16,.1); background: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink2); transition: background .15s; }
+  .close-btn:hover { background: var(--p50); }
+
+  main { max-width: 680px; margin: 0 auto; padding: 28px 20px 0; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 32px; color: var(--ink); margin-bottom: 6px; }
+  .updated { font-size: 12px; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 28px; }
+  .lede { font-size: 14px; color: var(--ink2); line-height: 1.75; margin-bottom: 28px; }
+
+  section { margin-bottom: 26px; }
+  section h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 18px; color: var(--ink); margin-bottom: 8px; }
+  section p, section li { font-size: 14px; color: var(--ink2); line-height: 1.75; margin-bottom: 8px; }
+  section ul { padding-left: 20px; margin-bottom: 8px; }
+  section strong { color: var(--ink); font-weight: 500; }
+
+  .callout { background: var(--white); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); margin: 10px 0 8px; display: flex; gap: 12px; align-items: flex-start; }
+  .callout i { color: var(--p); font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+  .callout p { margin: 0; color: var(--ink); font-size: 13px; line-height: 1.65; }
+
+  .fill { background: var(--p50); color: var(--p600); padding: 1px 6px; border-radius: 5px; font-size: 13px; font-weight: 500; }
+
+  footer { border-top: 0.5px solid rgba(30,21,16,.08); margin-top: 20px; padding-top: 20px; }
+  footer p { font-size: 12px; color: var(--ink3); line-height: 1.7; }
+  footer a { color: var(--p); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">flara</div>
+  <button class="close-btn" onclick="history.back()" aria-label="Back">
+    <i class="ti ti-x"></i>
+  </button>
+</div>
+
+<main>
+  <h1>Privacy Policy</h1>
+  <div class="updated">Last updated: August 6, 2026</div>
+  <p class="lede">Flara ("Flara," "we," "us") helps you track symptoms tied to chronic conditions like PCOS, endometriosis, and fibromyalgia, and turns your logs into AI-generated insights and doctor-ready reports. Because this involves health information, we've tried to be extra plain about what we collect and why. If anything here is unclear, reach out — see contact info below.</p>
+
+  <section>
+    <h2>Information we collect</h2>
+    <ul>
+      <li><strong>Account info:</strong> when you sign in with Google, we receive your name, email address, and profile photo.</li>
+      <li><strong>Health &amp; symptom data you log:</strong> pain level, energy level, mood, sleep hours, cycle day, symptoms (e.g. bloating, headache, brain fog), any free-text notes you write, your self-identified condition, and cycle length.</li>
+      <li><strong>Community content:</strong> if you post to the community feed, we store the text and, internally, which account it came from — even though other users see it as anonymous.</li>
+    </ul>
+    <p>We don't currently run behavioral analytics or ad tracking on Flara.</p>
+  </section>
+
+  <section>
+    <h2>How we use it</h2>
+    <p>To run the core app: save your logs, calculate your trends and streaks.</p>
+    <div class="callout">
+      <i class="ti ti-sparkles"></i>
+      <p><strong>AI insights:</strong> the numbers and notes from a log entry are sent to our AI provider, Groq, to generate the short personalized insight you see after logging. Groq processes this to return a response — it isn't used to train our own models.</p>
+    </div>
+    <p>To generate your doctor report: your PDF is built entirely in your browser from data already loaded there. It is not uploaded to or stored on our servers as part of generating it.</p>
+    <p>To operate community features, if you choose to use them.</p>
+  </section>
+
+  <section>
+    <h2>Who we share data with</h2>
+    <p>We do not sell your data, and we do not use advertising networks. We share data only with the providers that run Flara, each processing it solely to provide their service to us:</p>
+    <ul>
+      <li><strong>Google</strong> — sign-in</li>
+      <li><strong>Supabase</strong> — database and backend hosting</li>
+      <li><strong>Groq</strong> — AI processing for insights</li>
+      <li><strong>Vercel</strong> — web hosting</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Data security</h2>
+    <p>Your data is protected with row-level security in our database, so only your account can read or write your own logs, and connections to Flara are encrypted. No system is 100% secure, but we take reasonable steps to protect your information.</p>
+  </section>
+
+  <section>
+    <h2>Your choices &amp; rights</h2>
+    <p>You can ask to access, export, or delete your data at any time by contacting us at <span class="fill">[support email]</span>. Deleting your account removes your logs and profile from our active database.</p>
+  </section>
+
+  <section>
+    <h2>Data retention</h2>
+    <p>We keep your data for as long as your account is active, or until you ask us to delete it.</p>
+  </section>
+
+  <section>
+    <h2>Community posts</h2>
+    <p>Posts are shown to other users without your name attached. Please avoid including identifying details you wouldn't want associated with your account internally.</p>
+  </section>
+
+  <section>
+    <h2>Children's privacy</h2>
+    <p>Flara is intended for adults. It is not directed at, and we do not knowingly collect data from, anyone under 18.</p>
+  </section>
+
+  <section>
+    <h2>International users</h2>
+    <p>Our service providers may process data in different countries. If you're located in India, we aim to handle your personal data — including sensitive personal data — consistent with the Digital Personal Data Protection Act, 2023. If you're in the EU/UK or another jurisdiction with its own data protection law, the same principles of purpose limitation and data minimization guide how we handle your information.</p>
+  </section>
+
+  <section>
+    <h2>Not medical advice</h2>
+    <p>Flara is a self-tracking tool. Nothing in the app, including AI-generated insights, is a medical diagnosis or a substitute for care from a qualified healthcare provider.</p>
+  </section>
+
+  <section>
+    <h2>Changes to this policy</h2>
+    <p>We may update this policy as Flara changes. We'll update the date at the top when we do.</p>
+  </section>
+
+  <section>
+    <h2>Contact</h2>
+    <p>Questions about this policy? Email <span class="fill">[support email]</span>.</p>
+  </section>
+
+  <footer>
+    <p>© 2026 Flara · <a href="/terms">Terms of Service</a> · <a href="/app">Back to Flara</a></p>
+  </footer>
+</main>
+
+</body>
+</html>
