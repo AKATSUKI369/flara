@@ -480,6 +480,9 @@ Respond with only the insight text. No labels, no formatting.`;
         body: JSON.stringify({ prompt })
       });
       const data = await res.json();
+      if (!data.insight) {
+        console.warn('Using fallback insight —', data.error || `HTTP ${res.status}`, data.reason ? `(${data.reason})` : '');
+      }
       const insight = data.insight || fallbackInsight();
 
       document.getElementById('insLoading').style.display = 'none';
@@ -489,6 +492,7 @@ Respond with only the insight text. No labels, no formatting.`;
       await sb.from('symptom_logs').update({ ai_insight: insight }).eq('id', log.id);
 
     } catch(e) {
+      console.error('Insight request failed entirely:', e);
       document.getElementById('insLoading').style.display = 'none';
       typeWrite(fallbackInsight(), document.getElementById('insTxt'));
     }

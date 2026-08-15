@@ -11,6 +11,7 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
+    console.error('GROQ_API_KEY is not set in this environment');
     return res.status(500).json({ error: 'Server is missing GROQ_API_KEY' });
   }
 
@@ -35,15 +36,23 @@ export default async function handler(req, res) {
 
     if (!groqRes.ok) {
       const errText = await groqRes.text();
-      console.error('Groq error:', errText);
-      return res.status(502).json({ error: 'Upstream AI error' });
+      if (groqRes.status === 429) {
+        // Groq's free tier is 30 requests/min and ~6K tokens/min, shared across
+        // the whole account — this fires whenever that's exhausted. It's not a
+        // code bug, but every hit means the user silently got template text
+        // instead of a real insight, so it's worth its own log line.
+        console.warn('Groq rate limit hit (429):', errText);
+        return res.status(429).json({ error: 'Rate limited', reason: 'rate_limit' });
+      }
+      console.error('Groq error:', groqRes.status, errText);
+      return res.status(502).json({ error: 'Upstream AI error', reason: 'upstream_error' });
     }
 
     const data = await groqRes.json();
     const insight = data.choices?.[0]?.message?.content?.trim() || null;
     return res.status(200).json({ insight });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Something went wrong' });
+    console.error('Insight handler threw:', err);
+    return res.status(500).json({ error: 'Something went wrong', reason: 'exception' });
   }
 }
