@@ -49,27 +49,23 @@
   .social-text { font-size: 13px; color: var(--ink2); }
   .social-text strong { color: var(--ink); font-weight: 500; }
 
-  /* Phone mockup */
-  .mockup-wrap { padding: 0 24px 60px; display: flex; justify-content: center; }
-  .phone { width: 280px; background: var(--white); border-radius: 32px; padding: 20px 16px; border: 0.5px solid rgba(212,83,126,.15); box-shadow: 0 20px 80px rgba(30,21,16,.1), 0 4px 20px rgba(212,83,126,.1); }
-  .phone-bar { width: 60px; height: 4px; border-radius: 99px; background: rgba(30,21,16,.1); margin: 0 auto 16px; }
-  .phone-logo { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 300; color: var(--p); margin-bottom: 12px; }
-  .phone-greeting { font-size: 18px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
-  .phone-greeting em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
-  .phone-date { font-size: 11px; color: var(--ink3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
-  .phone-cta { background: var(--p); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .phone-cta-text { font-size: 13px; font-weight: 500; color: #fff; }
-  .phone-cta-sub { font-size: 10px; color: rgba(255,255,255,.7); margin-top: 1px; }
-  .phone-cta-icon { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; }
-  .phone-card { background: var(--cream); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
-  .phone-card-label { font-size: 10px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
-  .phone-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .phone-stat { background: var(--white); border-radius: 8px; padding: 8px; }
-  .phone-stat-num { font-size: 18px; font-weight: 500; }
-  .phone-stat-label { font-size: 10px; color: var(--ink3); }
-  .phone-insight { background: #1a1510; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
-  .phone-insight-label { font-size: 10px; font-weight: 500; color: var(--p100); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
-  .phone-insight-text { font-size: 12px; color: #f0e8e4; line-height: 1.6; font-family: 'Fraunces', serif; font-style: italic; }
+  /* Preview gallery */
+  .preview-section { padding: 60px 0; }
+  .preview-head { max-width: 640px; margin: 0 auto; padding: 0 24px; }
+  .preview-scroll { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-left: 24px; padding: 8px 24px 14px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .preview-scroll::-webkit-scrollbar { display: none; }
+  .preview-item { flex: 0 0 auto; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .preview-caption { font-size: 12px; font-weight: 500; color: var(--ink2); text-transform: uppercase; letter-spacing: .07em; }
+  .preview-foot { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 4px; }
+  .preview-hint { font-size: 12px; color: var(--ink3); font-family: 'Fraunces', serif; font-style: italic; }
+  .preview-arrow-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid rgba(30,21,16,.12); background: var(--white); color: var(--ink2); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; font-family: inherit; }
+  .preview-arrow-btn:hover { background: var(--p50); color: var(--p); border-color: var(--p100); }
+  @media (max-width: 640px) { .preview-arrow-btn { display: none; } }
+
+  .phone-shot { position: relative; width: 280px; aspect-ratio: 9 / 19.5; border-radius: 32px; overflow: hidden; border: 0.5px solid rgba(212,83,126,.15); box-shadow: 0 20px 80px rgba(30,21,16,.1), 0 4px 20px rgba(212,83,126,.1); background: var(--cream); }
+  .phone-shot img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+  .phone-shot.img-missing img { display: none; }
+  .phone-shot.img-missing::after { content: attr(data-label); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 22px; font-size: 11px; line-height: 1.5; color: var(--ink3); }
 
   /* Features */
   .features { padding: 60px 24px; max-width: 640px; margin: 0 auto; }
@@ -176,36 +172,65 @@
   </div>
 </section>
 
-<!-- Phone mockup -->
-<div class="mockup-wrap">
-  <div class="phone">
-    <div class="phone-bar"></div>
-    <div class="phone-logo">flara</div>
-    <div class="phone-date">Mon, June 1</div>
-    <div class="phone-greeting">Good morning,<br><em>Priya</em></div>
-    <div style="height:12px"></div>
-    <div class="phone-cta">
-      <div>
-        <div class="phone-cta-text">Log today's symptoms</div>
-        <div class="phone-cta-sub">Takes under 60 seconds</div>
-      </div>
-      <div class="phone-cta-icon">+</div>
-    </div>
-    <div class="phone-card">
-      <div class="phone-card-label">This week</div>
-      <div class="phone-stats">
-        <div class="phone-stat"><div class="phone-stat-num" style="color:var(--p)">3.2</div><div class="phone-stat-label">Avg pain</div></div>
-        <div class="phone-stat"><div class="phone-stat-num" style="color:var(--t)">6.8</div><div class="phone-stat-label">Avg energy</div></div>
-        <div class="phone-stat"><div class="phone-stat-num">7.1h</div><div class="phone-stat-label">Avg sleep</div></div>
-        <div class="phone-stat"><div class="phone-stat-num">Day 14</div><div class="phone-stat-label">Cycle phase</div></div>
-      </div>
-    </div>
-    <div class="phone-insight">
-      <div class="phone-insight-label">✦ Flara insight</div>
-      <div class="phone-insight-text">"Your pain was lowest on days you slept over 7 hours — a pattern across your last 6 logs."</div>
-    </div>
+<!-- Preview gallery -->
+<section class="preview-section">
+  <div class="preview-head">
+    <p class="section-label">See it in action</p>
+    <h2 class="section-title">Every screen,<br><em>built for flare days</em></h2>
   </div>
-</div>
+
+  <div class="preview-scroll" id="previewScroll">
+
+    <div class="preview-item">
+      <div class="phone-shot" data-label="Add public/previews/dashboard.png">
+        <img src="/previews/dashboard.png" alt="Flara dashboard screen" onerror="this.parentElement.classList.add('img-missing')">
+      </div>
+      <div class="preview-caption">Dashboard</div>
+    </div>
+
+    <div class="preview-item">
+      <div class="phone-shot" data-label="Add public/previews/log.png">
+        <img src="/previews/log.png" alt="Flara daily log screen" onerror="this.parentElement.classList.add('img-missing')">
+      </div>
+      <div class="preview-caption">Daily log</div>
+    </div>
+
+    <div class="preview-item">
+      <div class="phone-shot" data-label="Add public/previews/trends.png">
+        <img src="/previews/trends.png" alt="Flara trends screen" onerror="this.parentElement.classList.add('img-missing')">
+      </div>
+      <div class="preview-caption">Trends</div>
+    </div>
+
+    <div class="preview-item">
+      <div class="phone-shot" data-label="Add public/previews/report.png">
+        <img src="/previews/report.png" alt="Flara doctor report screen" onerror="this.parentElement.classList.add('img-missing')">
+      </div>
+      <div class="preview-caption">Doctor report</div>
+    </div>
+
+    <div class="preview-item">
+      <div class="phone-shot" data-label="Add public/previews/community.png">
+        <img src="/previews/community.png" alt="Flara community screen" onerror="this.parentElement.classList.add('img-missing')">
+      </div>
+      <div class="preview-caption">Community</div>
+    </div>
+
+    <div class="preview-item">
+      <div class="phone-shot" data-label="Add public/previews/profile.png">
+        <img src="/previews/profile.png" alt="Flara profile screen" onerror="this.parentElement.classList.add('img-missing')">
+      </div>
+      <div class="preview-caption">Profile</div>
+    </div>
+
+  </div>
+
+  <div class="preview-foot">
+    <button class="preview-arrow-btn" onclick="scrollPreview(-1)" aria-label="Previous screen">‹</button>
+    <span class="preview-hint">swipe to explore</span>
+    <button class="preview-arrow-btn" onclick="scrollPreview(1)" aria-label="Next screen">›</button>
+  </div>
+</section>
 
 <!-- Pain points -->
 <section class="pain">
@@ -344,6 +369,16 @@
 <footer>
   <p>© 2026 Flara · <a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms</a> · Not medical advice</p>
 </footer>
+
+<script>
+function scrollPreview(dir) {
+  const el = document.getElementById('previewScroll');
+  const item = el.querySelector('.preview-item');
+  const gap = 20;
+  const amount = item ? item.getBoundingClientRect().width + gap : 300;
+  el.scrollBy({ left: dir * amount, behavior: 'smooth' });
+}
+</script>
 
 </body>
 </html>
