@@ -18,6 +18,9 @@
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 40px; }
+  /* Desktop: cap content at the same mobile-card width used app-wide, centered,
+     rather than letting it stretch edge-to-edge on wide viewports. */
+  .topbar, .prog-wrap, .screen, .nav-btns, .insight-screen { max-width: 480px; margin-left: auto; margin-right: auto; }
 
   .topbar { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
   .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
