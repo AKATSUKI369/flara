@@ -21,19 +21,19 @@
   body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 80px; }
 
   /* Topbar */
-  .topbar { max-width: 480px; margin: 0 auto; padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+  .topbar { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
   .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
   .topbar-right { display: flex; align-items: center; gap: 10px; }
   .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--p600); cursor: pointer; }
 
   /* Greeting */
-  .greeting { max-width: 480px; margin: 0 auto; padding: 20px 20px 0; }
+  .greeting { padding: 20px 20px 0; }
   .g-date { font-size: 11px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
   .g-title { font-size: 22px; font-weight: 500; color: var(--ink); line-height: 1.3; }
   .g-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
 
   /* Cards */
-  .cards { max-width: 480px; margin: 0 auto; padding: 16px 20px 0; display: flex; flex-direction: column; gap: 12px; }
+  .cards { padding: 16px 20px 0; display: flex; flex-direction: column; gap: 12px; }
   .card { background: var(--white); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); }
   .clabel { font-size: 11px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
   .clabel-left { display: flex; align-items: center; gap: 6px; }
@@ -66,16 +66,13 @@
   .wdot.today { background: var(--p); color: #fff; border-color: var(--p); }
   .wlabel { font-size: 10px; color: var(--ink3); font-weight: 500; }
 
-  /* Bento grid — replaces the old uniform stats-grid. Streak, chart and
-     insight are the hero tiles (full width); the four numbers are quieter
-     supporting tiles, two per row. */
-  .bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .bento-full { grid-column: 1 / -1; }
-  .bento-stat { padding: 14px; }
-  .bento-stat-label { font-size: 11px; color: var(--ink2); margin-bottom: 4px; }
-  .bento-stat-num { font-size: 24px; font-weight: 500; color: var(--ink); font-family: 'Fraunces', serif; }
-  .bento-stat.rose .bento-stat-num { color: var(--p); }
-  .bento-stat.teal .bento-stat-num { color: var(--t); }
+  /* Stats grid */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { background: var(--cream); border-radius: 12px; padding: 12px; }
+  .stat-num { font-size: 22px; font-weight: 500; color: var(--ink); }
+  .stat-label { font-size: 11px; color: var(--ink2); margin-top: 2px; }
+  .stat.rose .stat-num { color: var(--p); }
+  .stat.teal .stat-num { color: var(--t); }
 
   /* Chart */
   .chart-wrap { position: relative; height: 120px; }
@@ -134,72 +131,55 @@
     <div class="lc-icon"><i class="ti ti-plus" id="ctaIcon"></i></div>
   </button>
 
-  <div class="bento">
-
-    <div class="card bento-full">
-      <div class="clabel">
-        <div class="clabel-left"><i class="ti ti-flame" style="font-size:16px;color:var(--p)"></i> Streak</div>
+  <div class="card">
+    <div class="clabel">
+      <div class="clabel-left"><i class="ti ti-flame" style="font-size:16px;color:var(--p)"></i> Streak</div>
+    </div>
+    <div class="streak-row">
+      <div class="streak-num" id="streakNum">—</div>
+      <div class="streak-info">
+        <div class="streak-title" id="streakTitle">Loading…</div>
+        <div class="streak-sub" id="streakSub"></div>
       </div>
-      <div class="streak-row">
-        <div class="streak-num" id="streakNum">—</div>
-        <div class="streak-info">
-          <div class="streak-title" id="streakTitle">Loading…</div>
-          <div class="streak-sub" id="streakSub"></div>
-        </div>
-        <div class="streak-fire" id="streakFire"></div>
-      </div>
-      <div class="week-row" id="weekRow"></div>
+      <div class="streak-fire" id="streakFire"></div>
     </div>
-
-    <div class="card bento-stat rose">
-      <div class="bento-stat-label">Avg pain</div>
-      <div class="bento-stat-num" id="statPain">—</div>
-    </div>
-    <div class="card bento-stat teal">
-      <div class="bento-stat-label">Avg energy</div>
-      <div class="bento-stat-num" id="statEnergy">—</div>
-    </div>
-    <div class="card bento-stat">
-      <div class="bento-stat-label">Avg sleep</div>
-      <div class="bento-stat-num" id="statSleep">—</div>
-    </div>
-    <div class="card bento-stat">
-      <div class="bento-stat-label">Cycle day</div>
-      <div class="bento-stat-num" id="statCycle">—</div>
-    </div>
-
-    <div class="card bento-full">
-      <div class="clabel">
-        <div class="clabel-left"><i class="ti ti-chart-line" style="font-size:16px"></i> Pain this week</div>
-      </div>
-      <div class="chart-wrap">
-        <canvas id="painChart"></canvas>
-      </div>
-    </div>
-
-    <div class="insight-box bento-full" id="insightBox">
-      <div class="ib-label"><i class="ti ti-sparkles"></i> Latest insight</div>
-      <div class="ib-text ib-empty" id="insightText">Log a few days to unlock AI-powered insights about your patterns.</div>
-    </div>
-
+    <div class="week-row" id="weekRow"></div>
   </div>
 
-  <button class="log-cta" style="background:var(--white);border:0.5px solid rgba(30,21,16,.08);box-shadow:var(--shadow)" onclick="window.location.href='/report'">
-    <div class="lc-left">
-      <div class="lc-title" style="color:var(--ink)">Doctor visit report</div>
-      <div class="lc-sub" style="color:var(--ink2)">Generate a PDF summary</div>
+  <div class="card">
+    <div class="clabel">
+      <div class="clabel-left"><i class="ti ti-chart-bar" style="font-size:16px"></i> This week</div>
     </div>
-    <div class="lc-icon" style="background:var(--p50);color:var(--p)"><i class="ti ti-file-download"></i></div>
-  </button>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat skeleton" style="height:56px"></div>
+      <div class="stat skeleton" style="height:56px"></div>
+      <div class="stat skeleton" style="height:56px"></div>
+      <div class="stat skeleton" style="height:56px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">
+      <div class="clabel-left"><i class="ti ti-chart-line" style="font-size:16px"></i> Pain this week</div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="painChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight-box" id="insightBox">
+    <div class="ib-label"><i class="ti ti-sparkles"></i> Latest insight</div>
+    <div class="ib-text ib-empty" id="insightText">Log a few days to unlock AI-powered insights about your patterns.</div>
+  </div>
 
 </div>
 
 <nav class="bottom-nav">
-  <button class="nav-item active" onclick="window.location.href='/dashboard'"><i class="ti ti-home"></i>Home</button>
-  <button class="nav-item" onclick="window.location.href='/trends'"><i class="ti ti-chart-line"></i>Trends</button>
+  <button class="nav-item active"><i class="ti ti-home"></i>Home</button>
+  <button class="nav-item" onclick="goToLog()"><i class="ti ti-chart-line"></i>Trends</button>
   <div class="nav-fab-wrap"><button class="nav-fab" onclick="goToLog()"><i class="ti ti-plus"></i></button></div>
-  <button class="nav-item" onclick="window.location.href='/community'"><i class="ti ti-users"></i>Community</button>
-  <button class="nav-item" onclick="window.location.href='/profile'"><i class="ti ti-user"></i>Profile</button>
+  <button class="nav-item"><i class="ti ti-users"></i>Community</button>
+  <button class="nav-item"><i class="ti ti-user"></i>Profile</button>
 </nav>
 
 <script>
@@ -271,26 +251,19 @@ function buildWeekRow(logs) {
 }
 
 function buildStats(logs) {
-  const painEl = document.getElementById('statPain');
-  const energyEl = document.getElementById('statEnergy');
-  const sleepEl = document.getElementById('statSleep');
-  const cycleEl = document.getElementById('statCycle');
-
+  const grid = document.getElementById('statsGrid');
   if (!logs.length) {
-    painEl.textContent = '—';
-    energyEl.textContent = '—';
-    sleepEl.textContent = '—';
-    cycleEl.textContent = '—';
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Log your first day to see stats here.</div>';
     return;
   }
-
   const avg = (arr, key) => (arr.reduce((s, l) => s + (l[key] || 0), 0) / arr.length).toFixed(1);
   const todayLog = logs.find(l => l.log_date === now.toISOString().split('T')[0]);
-
-  painEl.textContent = avg(logs, 'pain_level');
-  energyEl.textContent = avg(logs, 'energy_level');
-  sleepEl.textContent = avg(logs, 'sleep_hours') + 'h';
-  cycleEl.textContent = todayLog?.cycle_day ? 'Day ' + todayLog.cycle_day : '—';
+  grid.innerHTML = `
+    <div class="stat rose"><div class="stat-num">${avg(logs,'pain_level')}</div><div class="stat-label">Avg pain</div></div>
+    <div class="stat teal"><div class="stat-num">${avg(logs,'energy_level')}</div><div class="stat-label">Avg energy</div></div>
+    <div class="stat"><div class="stat-num">${avg(logs,'sleep_hours')}h</div><div class="stat-label">Avg sleep</div></div>
+    <div class="stat"><div class="stat-num">${todayLog?.cycle_day ? 'Day '+todayLog.cycle_day : '—'}</div><div class="stat-label">Cycle day</div></div>
+  `;
 }
 
 function buildChart(logs) {
@@ -382,19 +355,7 @@ async function loadDashboard() {
   if (!session) { window.location.href = '/'; return; }
 
   const user = session.user;
-
-  // profiles.name is the source of truth (editable on the Profile tab).
-  // user_metadata.full_name is only the Google name captured at sign-in and
-  // never changes afterward, which is why edited names looked stuck here.
-  const { data: profile } = await sb
-    .from('profiles')
-    .select('name')
-    .eq('id', user.id)
-    .single();
-
-  const name = profile?.name?.split(' ')[0]
-    || user.user_metadata?.full_name?.split(' ')[0]
-    || 'there';
+  const name = user.user_metadata?.full_name?.split(' ')[0] || 'there';
 
   document.getElementById('greetingEl').innerHTML =
     getGreeting() + ',<br><em>' + name + '</em>';
