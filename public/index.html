@@ -1,617 +1,321 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flara — Track your PCOS, find your patterns</title>
-<meta name="description" content="Flara helps women with PCOS, endometriosis and fibromyalgia track symptoms, find triggers, and generate doctor reports. Free to start.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PropCopy AI — Real Estate Content Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --p:#D4537E; --p50:#FBEAF0; --p100:#F4C0D1; --p600:#993556;
-    --t:#1D9E75; --t50:#E1F5EE; --t100:#9FE1CB;
-    --a:#BA7517; --a50:#FAEEDA; --a100:#FAC775; --a800:#633806;
-    --v:#8B6ABF;
-    --ink:#1e1510; --ink2:#6b5f55; --ink3:#b0a49c;
-    --cream:#faf7f4; --white:#ffffff;
+    --bg: #0c0f0a;
+    --surface: #141710;
+    --surface2: #1c2018;
+    --border: #2a3024;
+    --accent: #b8f04a;
+    --accent-dim: #8ab835;
+    --accent-glow: rgba(184,240,74,0.12);
+    --text: #e8edd8;
+    --text-muted: #7a8a6a;
+    --text-dim: #4a5a3a;
+    --red: #ff6b5b;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); overflow-x: hidden; }
-
-  /* Nav */
-  nav { padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: rgba(250,247,244,.92); backdrop-filter: blur(12px); z-index: 100; border-bottom: 0.5px solid rgba(212,83,126,.08); }
-  .nav-logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 300; color: var(--p); letter-spacing: -.3px; }
-  .nav-cta { padding: 9px 20px; background: var(--p); color: #fff; border: none; border-radius: 99px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; text-decoration: none; }
-  .nav-cta:hover { opacity: .88; }
-
-  /* Hero */
-  .hero { padding: 80px 24px 60px; text-align: center; max-width: 640px; margin: 0 auto; }
-  .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--p50); color: var(--p600); font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 99px; margin-bottom: 24px; border: 0.5px solid var(--p100); }
-  .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--p); }
-  .hero-title { font-family: 'Fraunces', serif; font-size: clamp(36px, 8vw, 56px); font-weight: 300; line-height: 1.15; color: var(--ink); margin-bottom: 20px; }
-  .hero-title em { font-style: italic; color: var(--p); }
-  .hero-sub { font-size: 17px; color: var(--ink2); line-height: 1.7; margin-bottom: 36px; max-width: 480px; margin-left: auto; margin-right: auto; }
-  .hero-btns { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .btn-primary { padding: 16px 36px; background: var(--p); color: #fff; border: none; border-radius: 14px; font-family: inherit; font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all .2s; box-shadow: 0 4px 24px rgba(212,83,126,.3); }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 32px rgba(212,83,126,.4); opacity: .95; }
-  .hero-note { font-size: 12px; color: var(--ink3); }
-
-  /* Social proof */
-  .social-proof { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; }
-  .avatars { display: flex; }
-  .av { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--cream); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; margin-left: -8px; }
-  .av:first-child { margin-left: 0; }
-  .av1 { background: var(--p100); color: var(--p600); }
-  .av2 { background: var(--t100); color: #085041; }
-  .av3 { background: var(--a100); color: var(--a800); }
-  .av4 { background: #D3D1C7; color: #444441; }
-  .social-text { font-size: 13px; color: var(--ink2); }
-  .social-text strong { color: var(--ink); font-weight: 500; }
-
-  /* Preview gallery */
-  .preview-section { padding: 60px 0; }
-  .preview-head { max-width: 640px; margin: 0 auto; padding: 0 24px; }
-  .preview-stack { display: flex; flex-direction: column; align-items: center; gap: 36px; padding: 8px 24px 0; }
-  .preview-item { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .preview-caption { font-size: 12px; font-weight: 500; color: var(--ink2); text-transform: uppercase; letter-spacing: .07em; }
-  @media (min-width: 720px) {
-    .preview-stack { flex-direction: row; flex-wrap: wrap; justify-content: center; max-width: 940px; margin: 0 auto; gap: 32px 28px; padding: 8px 24px 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Outfit', sans-serif; font-weight: 300;
+    min-height: 100vh; overflow-x: hidden;
   }
-
-  /* Phone frame is chrome only. Everything inside is a scaled-down but exact
-     copy of each real page's own CSS (same class names, same values), scoped
-     under .pv-<page> so nothing leaks between mockups or collides with rules
-     elsewhere on this file. Update these by re-copying from the source page
-     if that page's design changes — not by eyeballing/approximating. */
-  .phone { width: 280px; background: var(--cream); border-radius: 32px; padding: 18px 14px 20px; border: 0.5px solid rgba(212,83,126,.15); box-shadow: 0 20px 80px rgba(30,21,16,.1), 0 4px 20px rgba(212,83,126,.1); overflow: hidden; }
-  .pv-logo { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 300; color: var(--p); margin-bottom: 10px; }
-
-  /* — dashboard.html — */
-  .pv-dash .g-date { font-size: 10px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px; }
-  .pv-dash .g-title { font-size: 18px; font-weight: 500; color: var(--ink); line-height: 1.25; margin-bottom: 12px; }
-  .pv-dash .g-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
-  .pv-dash .log-cta { background: var(--t); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(29,158,117,.25); margin-bottom: 8px; }
-  .pv-dash .lc-title { font-size: 13px; font-weight: 500; color: #fff; }
-  .pv-dash .lc-sub { font-size: 10.5px; color: rgba(255,255,255,.75); margin-top: 1px; }
-  .pv-dash .lc-icon { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
-  .pv-dash .bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .pv-dash .bento-full { grid-column: 1 / -1; }
-  .pv-dash .card { background: var(--white); border-radius: 14px; padding: 11px; box-shadow: 0 2px 20px rgba(30,21,16,.06); border: 0.5px solid rgba(30,21,16,.06); }
-  .pv-dash .clabel { font-size: 10px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
-  .pv-dash .streak-row { display: flex; align-items: center; gap: 10px; }
-  .pv-dash .streak-num { font-size: 34px; font-weight: 500; color: var(--p); line-height: 1; font-family: 'Fraunces', serif; }
-  .pv-dash .streak-title { font-size: 12.5px; font-weight: 500; color: var(--ink); margin-bottom: 1px; }
-  .pv-dash .streak-sub { font-size: 10px; color: var(--ink2); line-height: 1.4; }
-  .pv-dash .bento-stat-label { font-size: 10px; color: var(--ink2); margin-bottom: 3px; }
-  .pv-dash .bento-stat-num { font-size: 18px; font-weight: 500; color: var(--ink); font-family: 'Fraunces', serif; }
-  .pv-dash .bento-stat.rose .bento-stat-num { color: var(--p); }
-  .pv-dash .bento-stat.teal .bento-stat-num { color: var(--t); }
-  .pv-dash .insight-box { background: linear-gradient(135deg, #2a1a20 0%, #1a1510 100%); border-radius: 14px; padding: 12px; }
-  .pv-dash .ib-label { font-size: 10px; font-weight: 500; color: var(--p100); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
-  .pv-dash .ib-text { font-size: 11px; color: #f0e8e4; line-height: 1.55; font-family: 'Fraunces', serif; font-style: italic; }
-
-  /* — log.html — */
-  .pv-log .step-title { font-size: 19px; font-weight: 500; color: var(--ink); line-height: 1.2; margin-bottom: 4px; }
-  .pv-log .step-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
-  .pv-log .step-sub { font-size: 11.5px; color: var(--ink2); margin-bottom: 16px; line-height: 1.4; }
-  .pv-log .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .pv-log .metric-card { background: var(--white); border-radius: 16px; padding: 12px; box-shadow: 0 2px 20px rgba(30,21,16,.06); border: 0.5px solid rgba(30,21,16,.06); text-align: center; }
-  .pv-log .mc-num { font-family: 'Fraunces', serif; font-size: 34px; font-weight: 300; line-height: 1; margin-bottom: 2px; }
-  .pv-log .mc-label { font-size: 9.5px; font-weight: 500; text-transform: uppercase; letter-spacing: .07em; color: var(--ink3); }
-  .pv-log .card { background: var(--white); border-radius: 16px; padding: 12px; box-shadow: 0 2px 20px rgba(30,21,16,.06); border: 0.5px solid rgba(30,21,16,.06); }
-  .pv-log .clabel { font-size: 10px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
-  .pv-log .mood-row { display: flex; gap: 5px; }
-  .pv-log .mbtn { flex: 1; border: 0.5px solid rgba(30,21,16,.08); border-radius: 12px; padding: 8px 2px; background: var(--white); display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .pv-log .mbtn .mji { font-size: 17px; }
-  .pv-log .mbtn .mjl { font-size: 9px; font-weight: 500; color: var(--ink3); }
-  .pv-log .mbtn.active { background: var(--p50); border-color: var(--p100); }
-  .pv-log .mbtn.active .mjl { color: var(--p600); }
-
-  /* — trends.html — */
-  .pv-trends .page-title { font-size: 19px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
-  .pv-trends .page-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
-  .pv-trends .page-sub { font-size: 11px; color: var(--ink2); margin-bottom: 14px; }
-  .pv-trends .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-  .pv-trends .stat-card { background: var(--white); border-radius: 13px; padding: 11px; box-shadow: 0 2px 20px rgba(30,21,16,.06); border: 0.5px solid rgba(30,21,16,.06); position: relative; overflow: hidden; }
-  .pv-trends .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-  .pv-trends .stat-card.rose::before { background: var(--p); }
-  .pv-trends .stat-card.teal::before { background: var(--t); }
-  .pv-trends .stat-card.amber::before { background: var(--a); }
-  .pv-trends .stat-card.violet::before { background: var(--v); }
-  .pv-trends .stat-label { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink3); margin-bottom: 5px; }
-  .pv-trends .stat-value { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 500; color: var(--ink); line-height: 1; }
-  .pv-trends .insight-card { background: linear-gradient(135deg, #2a1a20 0%, #1a1510 100%); border-radius: 14px; padding: 13px; display: flex; gap: 10px; align-items: flex-start; }
-  .pv-trends .insight-icon { width: 26px; height: 26px; background: var(--p); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 13px; }
-  .pv-trends .insight-body h3 { font-size: 10.5px; font-weight: 500; color: var(--p100); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
-  .pv-trends .insight-body p { font-size: 11px; color: #f0e8e4; line-height: 1.55; font-family: 'Fraunces', serif; font-style: italic; }
-
-  /* — report.html — */
-  .pv-report .hero-title { font-size: 19px; font-weight: 500; color: var(--ink); line-height: 1.2; margin-bottom: 12px; }
-  .pv-report .hero-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
-  .pv-report .card { background: var(--white); border-radius: 16px; padding: 12px; box-shadow: 0 2px 20px rgba(30,21,16,.06); border: 0.5px solid rgba(30,21,16,.06); margin-bottom: 10px; }
-  .pv-report .clabel { font-size: 10px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
-  .pv-report .range-row { display: flex; gap: 6px; }
-  .pv-report .range-btn { flex: 1; padding: 8px 2px; border-radius: 10px; border: 0.5px solid rgba(30,21,16,.1); background: var(--white); font-size: 10.5px; font-weight: 500; color: var(--ink2); text-align: center; }
-  .pv-report .range-btn.active { background: var(--p); border-color: var(--p); color: #fff; }
-  .pv-report .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .pv-report .stat { background: var(--cream); border-radius: 10px; padding: 9px; }
-  .pv-report .stat-num { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; color: var(--ink); }
-  .pv-report .stat-label { font-size: 9.5px; color: var(--ink2); margin-top: 1px; }
-  .pv-report .stat.rose .stat-num { color: var(--p); }
-  .pv-report .stat.teal .stat-num { color: var(--t); }
-  .pv-report .gen-btn { width: 100%; padding: 12px; background: var(--p); color: #fff; border-radius: 12px; font-size: 12.5px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 20px rgba(212,83,126,.3); }
-
-  /* — community.html — */
-  .pv-community .page-title { font-size: 19px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
-  .pv-community .page-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
-  .pv-community .page-sub { font-size: 10.5px; color: var(--ink2); margin-bottom: 14px; line-height: 1.4; }
-  .pv-community .post { background: var(--white); border-radius: 16px; padding: 13px; box-shadow: 0 2px 20px rgba(30,21,16,.06); border: 0.5px solid rgba(30,21,16,.06); }
-  .pv-community .post-header { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
-  .pv-community .post-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; color: var(--p600); flex-shrink: 0; }
-  .pv-community .post-meta { flex: 1; }
-  .pv-community .post-name { font-size: 12px; font-weight: 500; color: var(--ink); }
-  .pv-community .post-time { font-size: 10px; color: var(--ink3); }
-  .pv-community .cond-pill { font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 99px; background: var(--p50); color: var(--p600); flex-shrink: 0; }
-  .pv-community .post-content { font-size: 12.5px; color: var(--ink); line-height: 1.55; margin-bottom: 10px; }
-  .pv-community .post-footer { display: flex; align-items: center; gap: 12px; }
-  .pv-community .like-btn { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--p); }
-  .pv-community .reply-toggle-btn { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--ink3); }
-  .pv-community .like-btn i, .pv-community .reply-toggle-btn i { font-size: 14px; }
-
-  /* — profile.html — */
-  .pv-profile .profile-hero { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 14px; }
-  .pv-profile .big-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--p100); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 500; color: var(--p600); margin-bottom: 8px; border: 3px solid var(--white); box-shadow: 0 4px 16px rgba(212,83,126,.2); }
-  .pv-profile .profile-name { font-size: 16px; font-weight: 500; color: var(--ink); margin-bottom: 1px; }
-  .pv-profile .plan-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 10.5px; font-weight: 500; background: var(--p50); color: var(--p600); margin-top: 4px; }
-  .pv-profile .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 12px; }
-  .pv-profile .stat-box { background: var(--white); border-radius: 12px; padding: 11px 6px; text-align: center; box-shadow: 0 2px 20px rgba(30,21,16,.06); border: 0.5px solid rgba(30,21,16,.06); }
-  .pv-profile .stat-box-num { font-size: 18px; font-weight: 500; color: var(--ink); font-family: 'Fraunces', serif; }
-  .pv-profile .stat-box-num.rose { color: var(--p); }
-  .pv-profile .stat-box-label { font-size: 9px; color: var(--ink3); margin-top: 2px; font-weight: 500; }
-  .pv-profile .card { background: var(--white); border-radius: 16px; padding: 12px; box-shadow: 0 2px 20px rgba(30,21,16,.06); border: 0.5px solid rgba(30,21,16,.06); }
-  .pv-profile .clabel { font-size: 10px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
-  .pv-profile .cond-row { display: flex; flex-wrap: wrap; gap: 6px; }
-  .pv-profile .cond-btn { border: 0.5px solid rgba(30,21,16,.1); border-radius: 9px; padding: 6px 10px; font-size: 10.5px; font-weight: 500; color: var(--ink2); background: var(--white); }
-  .pv-profile .cond-btn.active { background: var(--p50); border-color: var(--p100); color: var(--p600); }
-
-  /* Features */
-  .features { padding: 60px 24px; max-width: 640px; margin: 0 auto; }
-  .section-label { font-size: 11px; font-weight: 500; color: var(--p); text-transform: uppercase; letter-spacing: .1em; text-align: center; margin-bottom: 10px; }
-  .section-title { font-family: 'Fraunces', serif; font-size: clamp(28px, 6vw, 40px); font-weight: 300; color: var(--ink); text-align: center; line-height: 1.2; margin-bottom: 48px; }
-  .section-title em { color: var(--p); font-style: italic; }
-  .feat-grid { display: flex; flex-direction: column; gap: 16px; }
-  .feat-card { background: var(--white); border-radius: 18px; padding: 20px; border: 0.5px solid rgba(30,21,16,.06); display: flex; gap: 16px; align-items: flex-start; }
-  .feat-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-  .fi-pink { background: var(--p50); }
-  .fi-green { background: var(--t50); }
-  .fi-amber { background: var(--a50); }
-  .fi-gray { background: #F1EFE8; }
-  .feat-body { flex: 1; }
-  .feat-title { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
-  .feat-desc { font-size: 13px; color: var(--ink2); line-height: 1.6; }
-  .feat-tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin-top: 6px; }
-  .tag-free { background: var(--t50); color: #085041; }
-  .tag-pro { background: var(--p50); color: var(--p600); }
-  @media (min-width: 720px) {
-    .features { max-width: 880px; }
-    .feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(184,240,74,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(184,240,74,0.03) 1px, transparent 1px);
+    background-size: 48px 48px; pointer-events: none; z-index: 0;
   }
+  .container { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; position: relative; z-index: 1; }
 
-  /* Pain points */
-  .pain { padding: 60px 24px; background: var(--white); }
-  .pain-inner { max-width: 640px; margin: 0 auto; }
-  .quote-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 36px; }
-  .quote-card { background: var(--cream); border-radius: 16px; padding: 18px 20px; border-left: 3px solid var(--p100); }
-  .quote-text { font-size: 14px; color: var(--ink2); line-height: 1.7; font-family: 'Fraunces', serif; font-style: italic; margin-bottom: 10px; }
-  .quote-meta { font-size: 12px; color: var(--ink3); font-weight: 500; }
-  .quote-meta span { color: var(--p); }
-  @media (min-width: 720px) {
-    .pain-inner { max-width: 920px; }
-    .quote-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+  header { text-align: center; margin-bottom: 48px; animation: fadeDown 0.7s ease both; }
+  .logo-tag {
+    display: inline-block; font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 0.2em; color: var(--accent); background: var(--accent-glow);
+    border: 1px solid rgba(184,240,74,0.25); padding: 5px 14px; border-radius: 2px;
+    margin-bottom: 18px; text-transform: uppercase;
   }
+  h1 {
+    font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 12px;
+  }
+  h1 span { color: var(--accent); font-style: italic; }
+  .subtitle { color: var(--text-muted); font-size: 1rem; max-width: 440px; margin: 0 auto; line-height: 1.6; }
 
-  /* How it works */
-  .how { padding: 60px 24px; max-width: 640px; margin: 0 auto; }
-  .steps { display: flex; flex-direction: column; gap: 0; margin-top: 36px; }
-  .step { display: flex; gap: 16px; padding-bottom: 28px; position: relative; }
-  .step:last-child { padding-bottom: 0; }
-  .step-left { display: flex; flex-direction: column; align-items: center; }
-  .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--p); color: #fff; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .step-line { flex: 1; width: 1px; background: var(--p100); margin-top: 6px; min-height: 20px; }
-  .step:last-child .step-line { display: none; }
-  .step-body { padding-top: 6px; flex: 1; }
-  .step-title { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
-  .step-desc { font-size: 13px; color: var(--ink2); line-height: 1.6; }
+  .form-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 32px; margin-bottom: 24px; animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field.full { grid-column: 1 / -1; }
+  label {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  input, select, textarea {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); font-family: 'Outfit', sans-serif; font-size: 14px;
+    font-weight: 300; padding: 11px 14px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  select option { background: var(--surface2); }
+  textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
+  input::placeholder, textarea::placeholder { color: var(--text-dim); }
 
-  /* Pricing */
-  .pricing { padding: 60px 24px; background: var(--white); }
-  .pricing-inner { max-width: 640px; margin: 0 auto; }
-  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 36px; }
-  .plan { background: var(--cream); border-radius: 18px; padding: 20px; border: 0.5px solid rgba(30,21,16,.06); }
-  .plan.featured { background: var(--p); border: none; }
-  .plan-name { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: var(--ink3); margin-bottom: 8px; }
-  .plan.featured .plan-name { color: rgba(255,255,255,.7); }
-  .plan-price { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 300; color: var(--ink); margin-bottom: 2px; }
-  .plan.featured .plan-price { color: #fff; }
-  .plan-period { font-size: 12px; color: var(--ink3); margin-bottom: 16px; }
-  .plan.featured .plan-period { color: rgba(255,255,255,.65); }
-  .plan-feat { font-size: 12px; color: var(--ink2); padding: 6px 0; border-bottom: 0.5px solid rgba(30,21,16,.06); display: flex; align-items: center; gap: 6px; }
-  .plan.featured .plan-feat { color: rgba(255,255,255,.85); border-bottom-color: rgba(255,255,255,.1); }
-  .plan-feat:last-child { border-bottom: none; }
-  .check { color: var(--t); font-size: 14px; flex-shrink: 0; }
-  .plan.featured .check { color: rgba(255,255,255,.9); }
+  .tone-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tone-pill {
+    padding: 6px 15px; border-radius: 100px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-muted); font-size: 13px;
+    font-family: 'Outfit', sans-serif; cursor: pointer; transition: all 0.15s;
+  }
+  .tone-pill:hover { border-color: var(--accent-dim); color: var(--text); }
+  .tone-pill.active { background: var(--accent); border-color: var(--accent); color: #0c0f0a; font-weight: 500; }
 
-  /* Final CTA */
-  .final-cta { padding: 80px 24px; text-align: center; max-width: 560px; margin: 0 auto; }
-  .final-title { font-family: 'Fraunces', serif; font-size: clamp(30px, 7vw, 46px); font-weight: 300; color: var(--ink); line-height: 1.2; margin-bottom: 16px; }
-  .final-title em { color: var(--p); font-style: italic; }
-  .final-sub { font-size: 15px; color: var(--ink2); line-height: 1.7; margin-bottom: 32px; }
+  .gen-btn {
+    width: 100%; margin-top: 24px; padding: 16px; background: var(--accent); color: #0c0f0a;
+    border: none; border-radius: 8px; font-family: 'Outfit', sans-serif;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .gen-btn:hover { background: #c8ff58; box-shadow: 0 0 24px rgba(184,240,74,0.3); }
+  .gen-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+  .spinner {
+    width: 17px; height: 17px; border: 2px solid rgba(0,0,0,0.2);
+    border-top-color: #0c0f0a; border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: none;
+  }
+  .gen-btn.loading .spinner { display: block; }
 
-  /* Footer */
-  footer { padding: 24px; text-align: center; font-size: 12px; color: var(--ink3); border-top: 0.5px solid rgba(30,21,16,.06); }
-  footer a { color: var(--p); text-decoration: none; }
+  .results { display: none; flex-direction: column; gap: 18px; animation: fadeUp 0.5s ease both; }
+  .results.visible { display: flex; }
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .result-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px; border-bottom: 1px solid var(--border); background: var(--surface2);
+  }
+  .result-title {
+    display: flex; align-items: center; gap: 9px; font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+  }
+  .copy-btn {
+    background: transparent; border: 1px solid var(--border); border-radius: 5px;
+    color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.1em; padding: 5px 13px; cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .result-body { padding: 22px; font-size: 14.5px; line-height: 1.8; color: var(--text); white-space: pre-wrap; font-weight: 300; }
 
-  @media (max-width: 480px) {
-    .pricing-grid { grid-template-columns: 1fr; }
-    .hero-title { font-size: 36px; }
+  .error-box {
+    background: rgba(255,107,91,0.08); border: 1px solid rgba(255,107,91,0.25);
+    border-radius: 8px; padding: 14px 18px; color: var(--red); font-size: 13px;
+    display: none; margin-top: 14px; line-height: 1.5;
+  }
+  .error-box.visible { display: block; }
+
+  footer {
+    text-align: center; margin-top: 56px; color: var(--text-dim);
+    font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.1em;
+  }
+  footer span { color: var(--accent-dim); }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-18px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(18px);  } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin     { to { transform: rotate(360deg); } }
+
+  @media (max-width: 580px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .field.full { grid-column: 1; }
+    .form-card { padding: 22px 18px; }
+    h1 { font-size: 2.2rem; }
   }
 </style>
 </head>
 <body>
+<div class="container">
 
-<nav>
-  <div class="nav-logo">flara</div>
-  <a href="/app" class="nav-cta">Get started free →</a>
-</nav>
+  <header>
+    <div class="logo-tag">✦ PropCopy AI</div>
+    <h1>Real Estate Content,<br/><span>Generated Instantly</span></h1>
+    <p class="subtitle">Enter property details and get a listing description, buyer follow-up email, and social caption — all in one click.</p>
+  </header>
 
-<!-- Hero -->
-<section class="hero">
-  <div class="hero-badge">
-    <div class="hero-badge-dot"></div>
-    Built for PCOS, endometriosis & fibromyalgia
+  <div class="form-card">
+    <div class="form-grid">
+      <div class="field">
+        <label>Property Type</label>
+        <select id="propType">
+          <option>Single Family Home</option>
+          <option>Condo / Apartment</option>
+          <option>Townhouse</option>
+          <option>Luxury Villa</option>
+          <option>Commercial Property</option>
+          <option>Land / Lot</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Listing Price</label>
+        <input type="text" id="price" placeholder="e.g. $485,000" />
+      </div>
+      <div class="field">
+        <label>Bedrooms / Bathrooms</label>
+        <input type="text" id="beds" placeholder="e.g. 3 bed / 2 bath" />
+      </div>
+      <div class="field">
+        <label>Square Footage</label>
+        <input type="text" id="sqft" placeholder="e.g. 1,850 sq ft" />
+      </div>
+      <div class="field">
+        <label>Location / Neighborhood</label>
+        <input type="text" id="location" placeholder="e.g. Austin, TX – South Congress" />
+      </div>
+      <div class="field">
+        <label>Year Built</label>
+        <input type="text" id="year" placeholder="e.g. 2018" />
+      </div>
+      <div class="field full">
+        <label>Key Features & Highlights</label>
+        <textarea id="features" placeholder="e.g. Open-concept kitchen, granite countertops, hardwood floors, 2-car garage, backyard pool, newly renovated bathrooms, close to top-rated schools..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Content Tone</label>
+        <div class="tone-group" id="toneGroup">
+          <button class="tone-pill active" data-tone="Luxury and sophisticated">Luxury</button>
+          <button class="tone-pill" data-tone="Warm and friendly">Warm & Friendly</button>
+          <button class="tone-pill" data-tone="Professional and direct">Professional</button>
+          <button class="tone-pill" data-tone="Exciting and energetic">Exciting</button>
+          <button class="tone-pill" data-tone="Minimalist and clean">Minimalist</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      <div class="spinner"></div>
+      <span id="btnTxt">✦ Generate All Content</span>
+    </button>
+    <div class="error-box" id="errorBox"></div>
   </div>
-  <h1 class="hero-title">Your body has<br>patterns. <em>Find them.</em></h1>
-  <p class="hero-sub">Flara tracks your symptoms every day and uses AI to find what's making you worse — so you can finally walk into a doctor's office with proof.</p>
-  <div class="hero-btns">
-    <a href="/app" class="btn-primary">Start tracking for free →</a>
-    <p class="hero-note">No credit card. No ads. Your data stays yours.</p>
-  </div>
-  <div class="social-proof">
-    <div class="avatars">
-      <div class="av av1">P</div>
-      <div class="av av2">S</div>
-      <div class="av av3">A</div>
-      <div class="av av4">M</div>
+
+  <div class="results" id="results">
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-title">📝 Listing Description</div>
+        <button class="copy-btn" onclick="copyText('listing', this)">Copy</button>
+      </div>
+      <div class="result-body" id="listing"></div>
     </div>
-    <p class="social-text">Join women <strong>tracking their patterns</strong> with Flara</p>
-  </div>
-</section>
-
-<!-- Preview gallery -->
-<section class="preview-section">
-  <div class="preview-head">
-    <p class="section-label">See it in action</p>
-    <h2 class="section-title">Every screen,<br><em>built for flare days</em></h2>
-  </div>
-
-  <div class="preview-stack">
-
-    <div class="preview-item">
-      <div class="phone pv-dash">
-        <div class="pv-logo">flara</div>
-        <div class="g-date">FRI, AUGUST 21</div>
-        <div class="g-title">Good morning,<br><em>Priya</em></div>
-        <div class="log-cta">
-          <div>
-            <div class="lc-title">Today's log saved ✓</div>
-            <div class="lc-sub">Come back tomorrow</div>
-          </div>
-          <div class="lc-icon"><i class="ti ti-check"></i></div>
-        </div>
-        <div class="bento">
-          <div class="card bento-full">
-            <div class="clabel"><i class="ti ti-flame"></i> Streak</div>
-            <div class="streak-row">
-              <div class="streak-num">12</div>
-              <div>
-                <div class="streak-title">12 days in a row</div>
-                <div class="streak-sub">Your AI insights are getting powerful.</div>
-              </div>
-            </div>
-          </div>
-          <div class="card bento-stat rose">
-            <div class="bento-stat-label">Avg pain</div>
-            <div class="bento-stat-num">3.2</div>
-          </div>
-          <div class="card bento-stat teal">
-            <div class="bento-stat-label">Avg energy</div>
-            <div class="bento-stat-num">6.8</div>
-          </div>
-          <div class="card bento-stat">
-            <div class="bento-stat-label">Avg sleep</div>
-            <div class="bento-stat-num">7.1h</div>
-          </div>
-          <div class="card bento-stat">
-            <div class="bento-stat-label">Cycle day</div>
-            <div class="bento-stat-num">Day 14</div>
-          </div>
-          <div class="insight-box bento-full">
-            <div class="ib-label"><i class="ti ti-sparkles"></i> Latest insight</div>
-            <div class="ib-text">"Your pain was lowest on days you slept over 7 hours — a pattern across your last 6 logs."</div>
-          </div>
-        </div>
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-title">📧 Buyer Follow-Up Email</div>
+        <button class="copy-btn" onclick="copyText('email', this)">Copy</button>
       </div>
-      <div class="preview-caption">Dashboard</div>
+      <div class="result-body" id="email"></div>
     </div>
-
-    <div class="preview-item">
-      <div class="phone pv-log">
-        <div class="pv-logo">flara</div>
-        <div class="step-title">How's your<br><em>body</em> today?</div>
-        <div class="step-sub">Move the sliders — don't overthink it.</div>
-        <div class="two-col">
-          <div class="metric-card">
-            <div class="mc-num" style="color:var(--p)">3</div>
-            <div class="mc-label">Pain</div>
-          </div>
-          <div class="metric-card">
-            <div class="mc-num" style="color:var(--t)">7</div>
-            <div class="mc-label">Energy</div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="clabel"><i class="ti ti-mood-smile"></i> Mood</div>
-          <div class="mood-row">
-            <div class="mbtn"><span class="mji">😞</span><span class="mjl">Low</span></div>
-            <div class="mbtn"><span class="mji">😕</span><span class="mjl">Meh</span></div>
-            <div class="mbtn"><span class="mji">😐</span><span class="mjl">Okay</span></div>
-            <div class="mbtn active"><span class="mji">🙂</span><span class="mjl">Good</span></div>
-            <div class="mbtn"><span class="mji">😊</span><span class="mjl">Great</span></div>
-          </div>
-        </div>
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-title">📱 Social Media Caption</div>
+        <button class="copy-btn" onclick="copyText('social', this)">Copy</button>
       </div>
-      <div class="preview-caption">Daily log</div>
-    </div>
-
-    <div class="preview-item">
-      <div class="phone pv-trends">
-        <div class="pv-logo">flara</div>
-        <div class="page-title">Your <em>trends</em></div>
-        <div class="page-sub">18 logs in the last 30 days</div>
-        <div class="summary-grid">
-          <div class="stat-card rose"><div class="stat-label">Avg Pain</div><div class="stat-value">3.4</div></div>
-          <div class="stat-card teal"><div class="stat-label">Avg Energy</div><div class="stat-value">6.9</div></div>
-          <div class="stat-card amber"><div class="stat-label">Avg Mood</div><div class="stat-value">6.6</div></div>
-          <div class="stat-card violet"><div class="stat-label">Avg Sleep</div><div class="stat-value">7.2h</div></div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-icon"><i class="ti ti-sparkles"></i></div>
-          <div class="insight-body">
-            <h3>Pattern spotted</h3>
-            <p>Saturdays tend to be your highest-pain days. You might plan lighter activities that day.</p>
-          </div>
-        </div>
-      </div>
-      <div class="preview-caption">Trends</div>
-    </div>
-
-    <div class="preview-item">
-      <div class="phone pv-report">
-        <div class="pv-logo">flara</div>
-        <div class="hero-title">Doctor visit<br><em>report</em></div>
-        <div class="card">
-          <div class="clabel"><i class="ti ti-calendar"></i> Time range</div>
-          <div class="range-row">
-            <div class="range-btn">7 days</div>
-            <div class="range-btn active">30 days</div>
-            <div class="range-btn">90 days</div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="clabel"><i class="ti ti-eye"></i> Preview</div>
-          <div class="stats-grid">
-            <div class="stat rose"><div class="stat-num">4.1</div><div class="stat-label">Avg pain</div></div>
-            <div class="stat teal"><div class="stat-num">6.1</div><div class="stat-label">Avg energy</div></div>
-            <div class="stat"><div class="stat-num">7.2h</div><div class="stat-label">Avg sleep</div></div>
-            <div class="stat"><div class="stat-num">9/10</div><div class="stat-label">Worst pain day</div></div>
-          </div>
-        </div>
-        <div class="gen-btn"><i class="ti ti-file-download"></i> Generate PDF report</div>
-      </div>
-      <div class="preview-caption">Doctor report</div>
-    </div>
-
-    <div class="preview-item">
-      <div class="phone pv-community">
-        <div class="pv-logo">flara</div>
-        <div class="page-title">Community <em>support</em></div>
-        <div class="page-sub">Anonymous, safe space for chronic conditions</div>
-        <div class="post">
-          <div class="post-header">
-            <div class="post-avatar">QL</div>
-            <div class="post-meta">
-              <div class="post-name">Quiet Lotus 214</div>
-              <div class="post-time">2h ago</div>
-            </div>
-            <div class="cond-pill">PCOS</div>
-          </div>
-          <div class="post-content">Finally found a pattern — my flares always follow low-sleep nights. Logging really does pay off 😮</div>
-          <div class="post-footer">
-            <div class="like-btn"><i class="ti ti-heart-filled"></i> 12</div>
-            <div class="reply-toggle-btn"><i class="ti ti-message-circle"></i> 4</div>
-          </div>
-        </div>
-      </div>
-      <div class="preview-caption">Community</div>
-    </div>
-
-    <div class="preview-item">
-      <div class="phone pv-profile">
-        <div class="pv-logo">flara</div>
-        <div class="profile-hero">
-          <div class="big-avatar">P</div>
-          <div class="profile-name">Priya</div>
-          <span class="plan-badge">Free plan</span>
-        </div>
-        <div class="stats-row">
-          <div class="stat-box"><div class="stat-box-num">12</div><div class="stat-box-label">Day streak 🔥</div></div>
-          <div class="stat-box"><div class="stat-box-num">47</div><div class="stat-box-label">Total logs</div></div>
-          <div class="stat-box"><div class="stat-box-num rose">3.4</div><div class="stat-box-label">Avg pain</div></div>
-        </div>
-        <div class="card">
-          <div class="clabel"><i class="ti ti-settings"></i> Condition</div>
-          <div class="cond-row">
-            <div class="cond-btn active">PCOS 🌸</div>
-            <div class="cond-btn">Endometriosis 🌿</div>
-          </div>
-        </div>
-      </div>
-      <div class="preview-caption">Profile</div>
-    </div>
-
-  </div>
-</section>
-
-<!-- Pain points -->
-<section class="pain">
-  <div class="pain-inner">
-    <p class="section-label">You are not alone</p>
-    <h2 class="section-title">Doctors have<br><em>7 minutes</em> for you</h2>
-    <div class="quote-grid">
-      <div class="quote-card">
-        <p class="quote-text">"They just said 'lose weight' — which is really useless. None of my doctors have ever offered valuable advice."</p>
-        <p class="quote-meta">PCOS patient · <span>Oxford University study, 2024</span></p>
-      </div>
-      <div class="quote-card">
-        <p class="quote-text">"I'm usually being my own doctor. Reddit is where I go for actual medical advice."</p>
-        <p class="quote-meta">Endometriosis patient · <span>r/endo community</span></p>
-      </div>
-      <div class="quote-card">
-        <p class="quote-text">"The average time to diagnose endometriosis is 7–10 years. We spend that time being dismissed."</p>
-        <p class="quote-meta">Research finding · <span>ACOG 2024</span></p>
-      </div>
+      <div class="result-body" id="social"></div>
     </div>
   </div>
-</section>
 
-<!-- Features -->
-<section class="features">
-  <p class="section-label">What Flara does</p>
-  <h2 class="section-title">Everything your<br>doctors <em>don't track</em></h2>
-  <div class="feat-grid">
-    <div class="feat-card">
-      <div class="feat-icon fi-pink">🌸</div>
-      <div class="feat-body">
-        <div class="feat-title">60-second daily log</div>
-        <div class="feat-desc">Pain, energy, mood, sleep, cycle day — logged in under a minute. Designed for brain-fog days.</div>
-        <span class="feat-tag tag-free">Free</span>
-      </div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon fi-green">✦</div>
-      <div class="feat-body">
-        <div class="feat-title">AI trigger detective</div>
-        <div class="feat-desc">After 2 weeks of logs, AI surfaces hidden patterns: "Your pain spikes after fewer than 6 hours of sleep."</div>
-        <span class="feat-tag tag-pro">Pro</span>
-      </div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon fi-amber">📋</div>
-      <div class="feat-body">
-        <div class="feat-title">Doctor visit report</div>
-        <div class="feat-desc">One tap generates a structured PDF summary of your last 30 days. Walk in prepared, not dismissed.</div>
-        <span class="feat-tag tag-pro">Pro</span>
-      </div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon fi-gray">🔮</div>
-      <div class="feat-body">
-        <div class="feat-title">Flare prediction</div>
-        <div class="feat-desc">Based on your cycle phase, sleep and history — Flara warns you 24 hours before a likely hard day.</div>
-        <span class="feat-tag tag-pro">Pro — coming soon</span>
-      </div>
-    </div>
-  </div>
-</section>
+  <footer>Built with <span>PropCopy AI</span> · Powered by Groq (Llama 3.3 70B) · Free to use</footer>
+</div>
 
-<!-- How it works -->
-<section class="how">
-  <p class="section-label">How it works</p>
-  <h2 class="section-title">Simple enough for<br>a <em>flare day</em></h2>
-  <div class="steps">
-    <div class="step">
-      <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
-      <div class="step-body">
-        <div class="step-title">Sign in with Google</div>
-        <div class="step-desc">One tap. No forms, no credit card, no setup. Your account is ready in seconds.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
-      <div class="step-body">
-        <div class="step-title">Log daily in 60 seconds</div>
-        <div class="step-desc">Rate your pain, energy, mood, sleep. Pick your symptoms. Done. Even on your worst days.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
-      <div class="step-body">
-        <div class="step-title">Get AI insights</div>
-        <div class="step-desc">After a few days, Flara starts finding patterns in your data that you'd never spot alone.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-left"><div class="step-num">4</div></div>
-      <div class="step-body">
-        <div class="step-title">Walk into your doctor prepared</div>
-        <div class="step-desc">Generate a structured report from your logs. No more forgetting symptoms. No more being dismissed.</div>
-      </div>
-    </div>
-  </div>
-</section>
+<script>
+  document.querySelectorAll('.tone-pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('.tone-pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+    });
+  });
 
-<!-- Pricing -->
-<section class="pricing">
-  <div class="pricing-inner">
-    <p class="section-label">Pricing</p>
-    <h2 class="section-title">Start free.<br><em>Upgrade when ready.</em></h2>
-    <div class="pricing-grid">
-      <div class="plan">
-        <div class="plan-name">Free</div>
-        <div class="plan-price">₹0</div>
-        <div class="plan-period">forever</div>
-        <div class="plan-feat"><span class="check">✓</span> Daily symptom log</div>
-        <div class="plan-feat"><span class="check">✓</span> 30-day history</div>
-        <div class="plan-feat"><span class="check">✓</span> Daily AI insight</div>
-        <div class="plan-feat"><span class="check">✓</span> Streak tracking</div>
-      </div>
-      <div class="plan featured">
-        <div class="plan-name">Pro</div>
-        <div class="plan-price">₹499</div>
-        <div class="plan-period">per month</div>
-        <div class="plan-feat"><span class="check">✓</span> Everything in Free</div>
-        <div class="plan-feat"><span class="check">✓</span> Trigger analysis</div>
-        <div class="plan-feat"><span class="check">✓</span> Doctor PDF report</div>
-        <div class="plan-feat"><span class="check">✓</span> Unlimited history</div>
-        <div class="plan-feat"><span class="check">✓</span> Flare prediction</div>
-      </div>
-    </div>
-  </div>
-</section>
+  function getTone() { return document.querySelector('.tone-pill.active')?.dataset.tone || 'Professional'; }
+  function showErr(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.classList.add('visible'); }
+  function hideErr() { document.getElementById('errorBox').classList.remove('visible'); }
 
-<!-- Final CTA -->
-<section class="final-cta">
-  <h2 class="final-title">Your patterns are<br><em>already there.</em></h2>
-  <p class="final-sub">You just need a tool that helps you see them. Start logging today — free, no credit card, takes 2 minutes to set up.</p>
-  <a href="/app" class="btn-primary">Start for free →</a>
-</section>
+  async function generate() {
+    hideErr();
+    const propType = document.getElementById('propType').value;
+    const price    = document.getElementById('price').value.trim();
+    const beds     = document.getElementById('beds').value.trim();
+    const sqft     = document.getElementById('sqft').value.trim();
+    const location = document.getElementById('location').value.trim();
+    const year     = document.getElementById('year').value.trim();
+    const features = document.getElementById('features').value.trim();
+    const tone     = getTone();
 
-<footer>
-  <p>© 2026 Flara · <a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms</a> · Not medical advice</p>
-</footer>
+    if (!location && !features) return showErr('Please fill in at least the Location and Key Features fields.');
 
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true; btn.classList.add('loading');
+    document.getElementById('btnTxt').textContent = 'Generating…';
+
+    const prompt = `You are an expert US real estate copywriter. Generate 3 pieces of content for the following property using a ${tone} tone.
+
+PROPERTY DETAILS:
+- Type: ${propType}
+- Price: ${price || 'Not specified'}
+- Bedrooms/Bathrooms: ${beds || 'Not specified'}
+- Square Footage: ${sqft || 'Not specified'}
+- Location: ${location || 'Not specified'}
+- Year Built: ${year || 'Not specified'}
+- Key Features: ${features || 'Not specified'}
+
+Use exactly these headers (with brackets):
+
+[LISTING DESCRIPTION]
+3-4 paragraph MLS listing description. Vivid, benefit-focused prose. End with a call to action. No bullet points.
+
+[FOLLOW-UP EMAIL]
+Follow-up email from agent to interested buyer. First line: "Subject: ...". Warm and helpful, 150-200 words.
+
+[SOCIAL CAPTION]
+Instagram/LinkedIn caption with 2-3 emojis and 8-10 hashtags at the end. Under 150 words.`;
+
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'API error');
+      if (!data.listing && !data.email && !data.social) throw new Error('No content returned. Please try again.');
+
+      document.getElementById('listing').textContent = data.listing || '—';
+      document.getElementById('email').textContent   = data.email   || '—';
+      document.getElementById('social').textContent  = data.social  || '—';
+
+      document.getElementById('results').classList.add('visible');
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch(e) {
+      showErr('Error: ' + (e.message || 'Something went wrong. Please try again.'));
+    } finally {
+      btn.disabled = false; btn.classList.remove('loading');
+      document.getElementById('btnTxt').textContent = '✦ Generate All Content';
+    }
+  }
+
+  function copyText(id, btn) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
 </body>
 </html>
