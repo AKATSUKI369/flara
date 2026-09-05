@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flara — How are you feeling today?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --rose:    #e8746a;
@@ -320,9 +320,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── CONFIG ──────────────────────────────────────────
-const SUPABASE_URL = 'https://your-project.supabase.co';  // ← paste your actual URL here
-const SUPABASE_KEY = 'your-anon-key-here';                // ← paste your anon key here
+const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
 // ────────────────────────────────────────────────────
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+});
+
+let currentUser = null;
 
 // State
 const state = {
@@ -330,6 +336,13 @@ const state = {
   sleep_hours: 7.0, cycle_day: null,
   bloating: false, headache: false, brain_fog: false
 };
+
+// ── Auth guard ──
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = '/'; return; }
+  currentUser = session.user;
+})();
 
 // ── Date label ──
 const now = new Date();
@@ -420,6 +433,16 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+// ── Fallback insight (used if the AI call fails or is rate-limited) ──
+function fallbackInsight() {
+  const pool = [
+    `With pain at ${state.pain_level}/10 today, your body is asking for some gentleness. ${state.sleep_hours < 6 ? 'Low sleep tends to amplify pain — even a short rest today could help.' : 'Your sleep gives your body a real foundation to work with.'} Keep logging daily — patterns become clearer within a couple of weeks.`,
+    `Energy at ${state.energy_level}/10 — ${state.energy_level >= 7 ? 'a stronger day. Notice what was different and try to repeat it.' : 'your body may be conserving. Protect your schedule and save demanding tasks for higher-energy days.'} Every log makes your insights sharper.`,
+    `Cycle day ${state.cycle_day || 'data incoming'} adds useful context to how you feel. Mood at ${state.mood}/10 tracked consistently over time can reveal patterns worth discussing with your doctor.`
+  ];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 // ── Submit ──
 document.getElementById('submitBtn').addEventListener('click', async function() {
   const btn = this;
@@ -430,16 +453,11 @@ document.getElementById('submitBtn').addEventListener('click', async function() 
   const notes = document.getElementById('notes').value;
 
   try {
-    // Init Supabase
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    if (!currentUser) { window.location.href = '/'; return; }
 
-    // Check auth
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) { window.location.href = '/login.html'; return; }
-
-    // Save to Supabase
+    // Save to Supabase — this is the part that must succeed
     const { data: log, error } = await sb.from('symptom_logs').insert({
-      user_id:      user.id,
+      user_id:      currentUser.id,
       log_date:     new Date().toISOString().split('T')[0],
       pain_level:   state.pain_level,
       energy_level: state.energy_level,
@@ -454,27 +472,49 @@ document.getElementById('submitBtn').addEventListener('click', async function() 
 
     if (error) throw error;
 
-    // Get AI insight
+    // The log is saved — confirm that now, independent of what happens with the insight below
+    btn.style.background = 'var(--sage)';
+    showToast('Log saved! ✓');
     lbl.innerHTML = 'Getting insight<span class="dots"><span></span><span></span><span></span></span>';
-    const res = await fetch('/api/save-log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ logId: log.id, userId: user.id, logData: { ...state, notes } })
-    });
-    const { insight } = await res.json();
 
-    // Update log with insight
+    // Get AI insight — best-effort. A failure here must never make a successful save look like an error.
+    let insight = fallbackInsight();
+    try {
+      const symptomList = [...activeChips].join(', ') || 'none';
+      const prompt = `You are Flara, a warm companion for people managing PCOS and chronic illness.
+Give ONE caring insight (2-3 sentences) based on today's log. Be warm and specific to the numbers. End with one gentle actionable tip.
+Never say "I". Never diagnose. Write in second person.
+
+Today's data:
+- Pain: ${state.pain_level}/10
+- Energy: ${state.energy_level}/10
+- Mood: ${state.mood}/10
+- Sleep: ${state.sleep_hours} hours
+- Cycle day: ${state.cycle_day || 'not logged'}
+- Symptoms: ${symptomList}
+- Notes: ${notes || 'none'}
+
+Respond with only the insight text. No labels, no formatting.`;
+
+      const res = await fetch('/api/insight', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data.insight) insight = data.insight;
+      else console.warn('Insight API returned no insight, using fallback:', data);
+    } catch (insightErr) {
+      console.warn('AI insight request failed, using fallback:', insightErr);
+    }
+
     await sb.from('symptom_logs').update({ ai_insight: insight }).eq('id', log.id);
 
-    // Show insight
     document.getElementById('insightText').textContent = insight;
     const card = document.getElementById('insightCard');
     card.classList.add('visible');
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
     lbl.textContent = '✓ Saved';
-    btn.style.background = 'var(--sage)';
-    showToast('Log saved! ✓');
 
   } catch (err) {
     console.error(err);
