@@ -3,526 +3,528 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flara — How are you feeling today?</title>
+<title>Flara — Log Today</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
   :root {
-    --rose:    #e8746a;
-    --rose-lt: #fdf0ef;
-    --rose-md: #f5cbc7;
-    --sage:    #7a9e87;
-    --cream:   #faf7f4;
-    --ink:     #2a2118;
-    --ink-2:   #6b5f55;
-    --ink-3:   #a89e96;
-    --white:   #ffffff;
-    --radius:  16px;
-    --shadow:  0 2px 20px rgba(42,33,24,.07);
+    --p:#D4537E; --p50:#FBEAF0; --p100:#F4C0D1; --p600:#993556;
+    --t:#1D9E75; --t50:#E1F5EE;
+    --ink:#1e1510; --ink2:#6b5f55; --ink3:#b0a49c;
+    --cream:#faf7f4; --white:#ffffff;
+    --shadow:0 2px 20px rgba(30,21,16,.06);
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--ink);
-    min-height: 100vh;
-    padding-bottom: 120px;
-  }
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 24px 0;
-  }
-  .logo {
-    font-family: 'Fraunces', serif;
-    font-size: 22px; font-weight: 300; color: var(--rose);
-    letter-spacing: -.5px;
-  }
-  .streak {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 13px; color: var(--ink-2);
-    background: var(--white); border-radius: 99px;
-    padding: 6px 14px; box-shadow: var(--shadow);
-  }
-  .streak-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rose); }
-  .greeting { padding: 28px 24px 0; }
-  .greeting-date {
-    font-size: 12px; font-weight: 500; color: var(--ink-3);
-    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px;
-  }
-  .greeting-title {
-    font-family: 'Fraunces', serif;
-    font-size: 28px; font-weight: 300; line-height: 1.25; color: var(--ink);
-  }
-  .greeting-title em { font-style: italic; color: var(--rose); }
-  .form { padding: 28px 24px 0; display: flex; flex-direction: column; gap: 20px; }
-  .card { background: var(--white); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
-  .card-label {
-    font-size: 12px; font-weight: 500; color: var(--ink-3);
-    text-transform: uppercase; letter-spacing: .07em;
-    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
-  }
-  .card-label .icon { font-size: 16px; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; padding-bottom: 40px; }
+  /* Desktop: cap content at the same mobile-card width used app-wide, centered,
+     rather than letting it stretch edge-to-edge on wide viewports. */
+  .topbar, .prog-wrap, .screen, .nav-btns, .insight-screen { max-width: 480px; margin-left: auto; margin-right: auto; }
 
-  /* Sliders */
-  .slider-row { display: flex; align-items: center; gap: 12px; }
-  .slider-val {
-    font-family: 'Fraunces', serif;
-    font-size: 28px; font-weight: 300; color: var(--rose);
-    min-width: 32px; text-align: center;
-  }
-  input[type=range] {
-    flex: 1; -webkit-appearance: none; appearance: none;
-    height: 6px; border-radius: 99px; outline: none; cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none;
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--white); border: 2px solid var(--rose);
-    box-shadow: 0 2px 8px rgba(232,116,106,.3); cursor: pointer;
-  }
-  input[type=range]::-moz-range-thumb {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--white); border: 2px solid var(--rose);
-    box-shadow: 0 2px 8px rgba(232,116,106,.3); cursor: pointer;
-  }
-  .slider-labels {
-    display: flex; justify-content: space-between;
-    font-size: 11px; color: var(--ink-3); margin-top: 6px;
-  }
+  .topbar { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; color: var(--p); }
+  .close-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid rgba(30,21,16,.1); background: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink2); font-size: 16px; transition: background .15s; }
+  .close-btn:hover { background: var(--p50); }
+
+  .prog-wrap { padding: 16px 20px 0; display: flex; align-items: center; gap: 8px; }
+  .prog-step { flex: 1; height: 3px; border-radius: 99px; background: rgba(30,21,16,.1); transition: background .3s; }
+  .prog-step.done { background: var(--p); }
+  .prog-step.active { background: var(--p100); }
+  .prog-lbl { font-size: 11px; color: var(--ink3); font-weight: 500; min-width: 28px; text-align: right; }
+
+  .screen { display: none; padding: 24px 20px 0; animation: slideIn .3s cubic-bezier(.4,0,.2,1); }
+  .screen.active { display: block; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+
+  .step-title { font-size: 24px; font-weight: 500; color: var(--ink); line-height: 1.25; margin-bottom: 4px; }
+  .step-title em { color: var(--p); font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
+  .step-sub { font-size: 13px; color: var(--ink2); margin-bottom: 20px; line-height: 1.5; }
+
+  .card { background: var(--white); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); margin-bottom: 12px; }
+  .clabel { font-size: 11px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+
+  /* Two col sliders */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .metric-card { background: var(--white); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); border: 0.5px solid rgba(30,21,16,.06); text-align: center; }
+  .mc-num { font-family: 'Fraunces', serif; font-size: 42px; font-weight: 300; line-height: 1; margin-bottom: 2px; transition: color .2s; }
+  .mc-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .07em; color: var(--ink3); margin-bottom: 12px; }
+  input[type=range] { width: 100%; accent-color: var(--p); cursor: pointer; }
+  .range-ends { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink3); margin-top: 4px; }
 
   /* Mood */
-  .mood-row { display: flex; justify-content: space-between; gap: 6px; }
-  .mood-btn {
-    flex: 1; border: 1.5px solid transparent;
-    border-radius: 12px; padding: 10px 4px;
-    background: var(--cream); cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    transition: all .15s; font-size: 22px; font-family: inherit;
-  }
-  .mood-btn .label { font-size: 10px; font-weight: 500; color: var(--ink-3); }
-  .mood-btn.active { background: var(--rose-lt); border-color: var(--rose); }
+  .mood-row { display: flex; gap: 6px; }
+  .mbtn { flex: 1; border: 0.5px solid rgba(30,21,16,.08); border-radius: 14px; padding: 10px 2px; background: var(--white); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all .15s; font-family: inherit; }
+  .mbtn .mji { font-size: 20px; }
+  .mbtn .mjl { font-size: 10px; font-weight: 500; color: var(--ink3); }
+  .mbtn.active { background: var(--p50); border-color: var(--p100); }
+  .mbtn.active .mjl { color: var(--p600); }
+
+  /* Sleep */
+  .sleep-row { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 8px 0; }
+  .s-btn { width: 42px; height: 42px; border-radius: 50%; border: 0.5px solid rgba(30,21,16,.1); background: var(--white); font-size: 22px; color: var(--p); cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; transition: background .15s; line-height: 1; }
+  .s-btn:hover { background: var(--p50); }
+  .s-val { font-size: 44px; font-weight: 500; color: var(--ink); min-width: 80px; text-align: center; font-family: 'Fraunces', serif; font-weight: 300; }
+  .s-unit { font-size: 12px; color: var(--ink3); text-align: center; margin-top: 2px; }
+
+  /* Cycle */
+  .cscroll { display: flex; gap: 6px; overflow-x: scroll; padding-bottom: 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .cscroll::-webkit-scrollbar { display: none; }
+  .cday { width: 38px; height: 38px; border-radius: 50%; border: 0.5px solid rgba(30,21,16,.1); background: var(--white); font-size: 12px; color: var(--ink2); cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 0 0 38px; transition: all .15s; font-family: inherit; }
+  .cday.active { background: var(--p); border-color: var(--p); color: #fff; font-weight: 500; transform: scale(1.08); }
+  .skip-btn { font-size: 12px; color: var(--ink3); background: none; border: none; cursor: pointer; font-family: inherit; margin-top: 8px; display: block; }
 
   /* Chips */
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip {
-    border: 1.5px solid var(--rose-md); border-radius: 99px; padding: 7px 14px;
-    font-size: 13px; color: var(--ink-2); cursor: pointer; background: var(--white);
-    transition: all .15s; user-select: none; font-family: inherit;
-  }
-  .chip.active { background: var(--rose); border-color: var(--rose); color: var(--white); }
-
-  /* Sleep stepper */
-  .num-row { display: flex; align-items: center; gap: 14px; }
-  .num-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 1.5px solid var(--rose-md); background: var(--white);
-    font-size: 20px; color: var(--rose); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all .15s; font-family: inherit; line-height: 1;
-  }
-  .num-btn:hover { background: var(--rose-lt); }
-  .num-val {
-    font-family: 'Fraunces', serif;
-    font-size: 28px; font-weight: 300; color: var(--ink);
-    min-width: 52px; text-align: center;
-  }
-  .num-unit { font-size: 13px; color: var(--ink-3); }
-
-  /* Cycle days */
-  .cycle-scroll {
-    display: flex; gap: 8px;
-    overflow-x: scroll; -webkit-overflow-scrolling: touch;
-    padding-bottom: 6px; scrollbar-width: none;
-    width: 100%; flex-wrap: nowrap;
-  }
-  .cycle-scroll::-webkit-scrollbar { display: none; }
-  .cycle-day {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 1.5px solid var(--rose-md); background: var(--white);
-    font-size: 13px; color: var(--ink-2); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex: 0 0 40px; transition: all .15s;
-  }
-  .cycle-day.active { background: var(--rose); border-color: var(--rose); color: var(--white); font-weight: 500; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip { border: 0.5px solid rgba(30,21,16,.1); border-radius: 99px; padding: 7px 14px; font-size: 13px; color: var(--ink2); cursor: pointer; background: var(--white); transition: all .15s; font-family: inherit; }
+  .chip.active { background: var(--p); border-color: var(--p); color: #fff; }
 
   /* Notes */
-  textarea {
-    width: 100%; border: 1.5px solid var(--rose-md);
-    border-radius: 12px; padding: 14px;
-    font-family: 'DM Sans', sans-serif; font-size: 14px;
-    color: var(--ink); background: var(--cream);
-    resize: none; outline: none; line-height: 1.6;
-    transition: border-color .15s;
-  }
-  textarea:focus { border-color: var(--rose); background: var(--white); }
-  textarea::placeholder { color: var(--ink-3); }
+  textarea { width: 100%; border: 0.5px solid rgba(30,21,16,.1); border-radius: 14px; padding: 12px 14px; font-family: inherit; font-size: 13px; color: var(--ink); background: var(--cream); resize: none; outline: none; line-height: 1.6; transition: border-color .15s; }
+  textarea:focus { border-color: var(--p); background: var(--white); }
+  textarea::placeholder { color: var(--ink3); }
 
-  /* Submit */
-  .submit-wrap { padding: 0 24px; }
-  .submit-btn {
-    width: 100%; padding: 18px;
-    background: var(--rose); color: var(--white);
-    border: none; border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 4px 20px rgba(232,116,106,.35);
-    transition: all .2s;
-  }
-  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(232,116,106,.45); }
-  .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  /* Nav buttons */
+  .nav-btns { padding: 20px 20px 0; display: flex; gap: 10px; align-items: center; }
+  .btn-primary { flex: 1; padding: 15px; background: var(--p); color: #fff; border: none; border-radius: 14px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 20px rgba(212,83,126,.25); transition: opacity .15s; }
+  .btn-primary:hover { opacity: .9; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-back { width: 44px; height: 44px; border-radius: 14px; border: 0.5px solid rgba(30,21,16,.1); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink2); font-size: 16px; transition: background .15s; }
+  .btn-back:hover { background: var(--p50); }
 
-  /* Insight */
-  .insight-card {
-    margin: 24px 24px 0;
-    background: linear-gradient(135deg, #2a2118 0%, #3d3028 100%);
-    border-radius: var(--radius); padding: 22px; display: none;
-  }
-  .insight-card.visible { display: block; animation: slideUp .4s ease; }
-  @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-  .insight-label {
-    font-size: 11px; font-weight: 500; color: var(--rose);
-    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px;
-  }
-  .insight-text {
-    font-family: 'Fraunces', serif; font-style: italic;
-    font-size: 17px; font-weight: 300; line-height: 1.6; color: #f0ebe6;
-  }
+  /* Insight screen */
+  .insight-screen { padding: 20px; display: none; }
+  .insight-screen.active { display: block; animation: fadeUp .4s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .ins-check { width: 54px; height: 54px; border-radius: 50%; background: var(--t50); border: 0.5px solid #9FE1CB; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; animation: pop .4s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+  .ins-check i { font-size: 24px; color: var(--t); }
+  .ins-title { font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .ins-sub { font-size: 13px; color: var(--ink2); margin-bottom: 20px; }
+
+  .ins-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .is { background: var(--cream); border-radius: 12px; padding: 12px; }
+  .is-n { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500; color: var(--ink); }
+  .is-l { font-size: 11px; color: var(--ink2); margin-top: 2px; }
+  .is.r .is-n { color: var(--p); }
+  .is.g .is-n { color: var(--t); }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .itag { font-size: 11px; padding: 4px 10px; border-radius: 99px; background: var(--p50); color: var(--p600); font-weight: 500; }
+
+  .ins-card { background: linear-gradient(135deg, #2a1a20 0%, #1a1510 100%); border-radius: 18px; padding: 18px; margin-bottom: 12px; }
+  .ins-lbl { font-size: 11px; font-weight: 500; color: var(--p100); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+  .ins-text { font-size: 14px; color: #f0e8e4; line-height: 1.75; font-family: 'Fraunces', serif; font-style: italic; min-height: 60px; }
+
+  .home-btn { width: 100%; padding: 14px; border: 0.5px solid rgba(30,21,16,.1); border-radius: 14px; background: var(--white); font-size: 14px; font-weight: 500; color: var(--ink2); cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s; }
+  .home-btn:hover { background: var(--p50); color: var(--p); }
+
+  .disc { font-size: 11px; color: var(--ink3); text-align: center; padding: 12px 0; line-height: 1.5; }
 
   /* Loading dots */
-  .dots { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: middle; }
-  .dots span {
-    width: 5px; height: 5px; border-radius: 50%; background: currentColor;
-    display: inline-block; animation: blink 1.2s infinite;
-  }
+  .dots { display: inline-flex; gap: 3px; margin-left: 4px; vertical-align: middle; }
+  .dots span { width: 4px; height: 4px; border-radius: 50%; background: currentColor; display: inline-block; animation: blink 1.2s infinite; }
   .dots span:nth-child(2) { animation-delay: .2s; }
   .dots span:nth-child(3) { animation-delay: .4s; }
-  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
-
-  /* Toast */
-  .toast {
-    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
-    background: var(--ink); color: var(--white);
-    padding: 12px 22px; border-radius: 99px;
-    font-size: 14px; font-weight: 500; z-index: 100;
-    transition: transform .3s ease; white-space: nowrap;
-    pointer-events: none;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .disclaimer { font-size: 11px; color: var(--ink-3); text-align: center; padding: 16px 24px 0; line-height: 1.6; }
+  @keyframes blink { 0%,80%,100% { opacity: .2; } 40% { opacity: 1; } }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="logo">flara</div>
-  <div class="streak">
-    <div class="streak-dot"></div>
-    <span id="streakText">Day 1 🔥</span>
-  </div>
-</div>
-
-<div class="greeting">
-  <div class="greeting-date" id="dateLabel"></div>
-  <div class="greeting-title">How are you<br>feeling <em>today?</em></div>
-</div>
-
-<div class="form">
-
-  <!-- Pain -->
-  <div class="card">
-    <div class="card-label"><span class="icon">🌡</span> Pain level</div>
-    <div class="slider-row">
-      <input type="range" id="painSlider" min="0" max="10" value="3">
-      <div class="slider-val" id="painVal">3</div>
-    </div>
-    <div class="slider-labels"><span>None</span><span>Mild</span><span>Moderate</span><span>Severe</span></div>
-  </div>
-
-  <!-- Energy -->
-  <div class="card">
-    <div class="card-label"><span class="icon">⚡</span> Energy level</div>
-    <div class="slider-row">
-      <input type="range" id="energySlider" min="0" max="10" value="5">
-      <div class="slider-val" id="energyVal">5</div>
-    </div>
-    <div class="slider-labels"><span>Exhausted</span><span>Low</span><span>Okay</span><span>Great</span></div>
-  </div>
-
-  <!-- Mood -->
-  <div class="card">
-    <div class="card-label"><span class="icon">🌸</span> Mood</div>
-    <div class="mood-row" id="moodRow">
-      <button class="mood-btn" data-val="2">😞<span class="label">Low</span></button>
-      <button class="mood-btn" data-val="4">😕<span class="label">Meh</span></button>
-      <button class="mood-btn active" data-val="6">😐<span class="label">Okay</span></button>
-      <button class="mood-btn" data-val="8">🙂<span class="label">Good</span></button>
-      <button class="mood-btn" data-val="10">😊<span class="label">Great</span></button>
-    </div>
-  </div>
-
-  <!-- Sleep -->
-  <div class="card">
-    <div class="card-label"><span class="icon">🌙</span> Sleep last night</div>
-    <div class="num-row">
-      <button class="num-btn" id="sleepMinus">−</button>
-      <div class="num-val" id="sleepVal">7.0</div>
-      <div class="num-unit">hours</div>
-      <button class="num-btn" id="sleepPlus">+</button>
-    </div>
-  </div>
-
-  <!-- Cycle day -->
-  <div class="card">
-    <div class="card-label"><span class="icon">🌒</span> Cycle day <span style="font-size:11px;color:var(--ink-3);text-transform:none;font-weight:400;letter-spacing:0;margin-left:4px">(scroll)</span></div>
-    <div class="cycle-scroll" id="cycleScroll"></div>
-  </div>
-
-  <!-- Symptoms -->
-  <div class="card">
-    <div class="card-label"><span class="icon">📍</span> Symptoms today</div>
-    <div class="chips" id="chipsContainer">
-      <button class="chip" data-key="bloating">Bloating</button>
-      <button class="chip" data-key="headache">Headache</button>
-      <button class="chip" data-key="brain_fog">Brain fog</button>
-      <button class="chip" data-key="cramps">Cramps</button>
-      <button class="chip" data-key="nausea">Nausea</button>
-      <button class="chip" data-key="fatigue">Fatigue</button>
-      <button class="chip" data-key="acne">Acne</button>
-      <button class="chip" data-key="anxiety">Anxiety</button>
-      <button class="chip" data-key="none">None today 🎉</button>
-    </div>
-  </div>
-
-  <!-- Notes -->
-  <div class="card">
-    <div class="card-label"><span class="icon">✏️</span> Anything else? <span style="font-size:11px;color:var(--ink-3);text-transform:none;font-weight:400;letter-spacing:0;margin-left:4px">(optional)</span></div>
-    <textarea id="notes" rows="3" placeholder="Stress, food, exercise, how work went…"></textarea>
-  </div>
-
-</div>
-
-<div style="height:20px"></div>
-<div class="submit-wrap">
-  <button class="submit-btn" id="submitBtn">
-    <span id="submitLabel">Save today's log</span>
+  <button class="close-btn" onclick="window.location.href='/dashboard'" aria-label="Close">
+    <i class="ti ti-x"></i>
   </button>
 </div>
 
-<div class="insight-card" id="insightCard">
-  <div class="insight-label">✦ Flara insight</div>
-  <div class="insight-text" id="insightText"></div>
+<div class="prog-wrap" id="progWrap">
+  <div class="prog-step active" id="p1"></div>
+  <div class="prog-step" id="p2"></div>
+  <div class="prog-step" id="p3"></div>
+  <div class="prog-lbl" id="pLbl">1/3</div>
 </div>
 
-<p class="disclaimer">Not medical advice. Always consult your doctor.</p>
-<div class="toast" id="toast"></div>
+<!-- Step 1: Pain, Energy, Mood -->
+<div class="screen active" id="s1">
+  <div class="step-title">How's your<br><em>body</em> today?</div>
+  <div class="step-sub">Move the sliders — don't overthink it.</div>
 
-<!-- Supabase loaded LAST so UI works even if it fails -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <div class="two-col">
+    <div class="metric-card">
+      <div class="mc-num" id="painV" style="color:var(--p)">3</div>
+      <div class="mc-label">Pain</div>
+      <input type="range" id="painR" min="0" max="10" value="3" step="1">
+      <div class="range-ends"><span>none</span><span>severe</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-num" id="energyV" style="color:var(--t)">6</div>
+      <div class="mc-label">Energy</div>
+      <input type="range" id="energyR" min="0" max="10" value="6" step="1">
+      <div class="range-ends"><span>zero</span><span>great</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel"><i class="ti ti-mood-smile"></i> Mood</div>
+    <div class="mood-row" id="moodRow">
+      <button class="mbtn" data-v="2"><span class="mji">😞</span><span class="mjl">Low</span></button>
+      <button class="mbtn" data-v="4"><span class="mji">😕</span><span class="mjl">Meh</span></button>
+      <button class="mbtn active" data-v="6"><span class="mji">😐</span><span class="mjl">Okay</span></button>
+      <button class="mbtn" data-v="8"><span class="mji">🙂</span><span class="mjl">Good</span></button>
+      <button class="mbtn" data-v="10"><span class="mji">😊</span><span class="mjl">Great</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: Sleep, Cycle -->
+<div class="screen" id="s2">
+  <div class="step-title">Sleep &<br><em>cycle</em></div>
+  <div class="step-sub">These unlock your most powerful patterns.</div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="clabel"><i class="ti ti-moon"></i> Sleep last night</div>
+    <div class="sleep-row">
+      <button class="s-btn" id="sleepM">−</button>
+      <div>
+        <div class="s-val" id="sleepV">7.0</div>
+        <div class="s-unit">hours</div>
+      </div>
+      <button class="s-btn" id="sleepP">+</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel"><i class="ti ti-circle-half-2"></i> Cycle day <span style="font-size:10px;text-transform:none;font-weight:400;letter-spacing:0;margin-left:4px">(swipe →)</span></div>
+    <div class="cscroll" id="cycleScroll"></div>
+    <button class="skip-btn" onclick="st.cycleDay=null;document.querySelectorAll('.cday').forEach(x=>x.classList.remove('active'))">Skip / not sure</button>
+  </div>
+</div>
+
+<!-- Step 3: Symptoms, Notes -->
+<div class="screen" id="s3">
+  <div class="step-title">Symptoms &<br><em>notes</em></div>
+  <div class="step-sub">Even mild symptoms matter — they build your pattern.</div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="clabel"><i class="ti ti-map-pin"></i> How are you feeling</div>
+    <div class="chips" id="chipsWrap">
+      <button class="chip" data-k="bloating">Bloating</button>
+      <button class="chip" data-k="headache">Headache</button>
+      <button class="chip" data-k="brain_fog">Brain fog</button>
+      <button class="chip" data-k="cramps">Cramps</button>
+      <button class="chip" data-k="nausea">Nausea</button>
+      <button class="chip" data-k="fatigue">Fatigue</button>
+      <button class="chip" data-k="acne">Acne</button>
+      <button class="chip" data-k="anxiety">Anxiety</button>
+      <button class="chip" data-k="hot_flash">Hot flashes</button>
+      <button class="chip" data-k="none">Nothing today ✓</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel"><i class="ti ti-pencil"></i> Notes <span style="font-size:10px;text-transform:none;font-weight:400;letter-spacing:0;margin-left:4px">(optional)</span></div>
+    <textarea id="notesTA" rows="3" placeholder="Stress, food, exercise, anything different today…"></textarea>
+  </div>
+</div>
+
+<!-- Nav buttons -->
+<div class="nav-btns" id="navBtns">
+  <button class="btn-back" id="backBtn" style="display:none" aria-label="Back">
+    <i class="ti ti-arrow-left"></i>
+  </button>
+  <button class="btn-primary" id="nextBtn">
+    Continue <i class="ti ti-arrow-right"></i>
+  </button>
+</div>
+
+<!-- Insight screen -->
+<div class="insight-screen" id="insightScreen">
+  <div class="ins-check"><i class="ti ti-check"></i></div>
+  <div class="ins-title" id="insTitle">Log saved!</div>
+  <div class="ins-sub" id="insSubDate"></div>
+
+  <div class="ins-stats">
+    <div class="is r"><div class="is-n" id="rPain">—</div><div class="is-l">Pain</div></div>
+    <div class="is g"><div class="is-n" id="rEnergy">—</div><div class="is-l">Energy</div></div>
+    <div class="is"><div class="is-n" id="rSleep">—</div><div class="is-l">Sleep</div></div>
+    <div class="is"><div class="is-n" id="rCycle">—</div><div class="is-l">Cycle day</div></div>
+  </div>
+
+  <div id="tagRow" class="tag-row"></div>
+
+  <div class="ins-card">
+    <div class="ins-lbl"><i class="ti ti-sparkles"></i> Flara insight</div>
+    <div class="ins-text" id="insTxt">
+      <span id="insLoading">Generating your insight<span class="dots"><span></span><span></span><span></span></span></span>
+    </div>
+  </div>
+
+  <button class="home-btn" onclick="window.location.href='/dashboard'">
+    <i class="ti ti-home"></i> Back to dashboard
+  </button>
+  <p class="disc">Not medical advice. Always consult your doctor.</p>
+</div>
+
 <script>
-// ── CONFIG ──────────────────────────────────────────
 const SUPABASE_URL = 'https://eksywmdtyjhfnrvxmdku.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_LGlQ_iISN3DmP5lto2QCKA_2yP2OMQe';
-// ────────────────────────────────────────────────────
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
 });
 
-let currentUser = null;
+const st = { pain: 3, energy: 6, mood: 6, sleep: 7.0, cycleDay: null, chips: new Set() };
+let step = 1;
+let userId = null;
+let userName = '';
 
-// State
-const state = {
-  pain_level: 3, energy_level: 5, mood: 6,
-  sleep_hours: 7.0, cycle_day: null,
-  bloating: false, headache: false, brain_fog: false
-};
+const now = new Date();
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-// ── Auth guard ──
+document.getElementById('insSubDate').textContent =
+  days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
+
+// Auth check
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { window.location.href = '/'; return; }
-  currentUser = session.user;
+  userId = session.user.id;
+  userName = session.user.user_metadata?.full_name?.split(' ')[0] || '';
+
+  // Check already logged today
+  const today = now.toISOString().split('T')[0];
+  const { data: existing } = await sb.from('symptom_logs')
+    .select('*').eq('user_id', userId).eq('log_date', today).single();
+  if (existing) {
+  document.getElementById('insTitle').textContent = 'Already logged today ✓';
+  document.getElementById('rPain').textContent = existing.pain_level + '/10';
+  document.getElementById('rEnergy').textContent = existing.energy_level + '/10';
+  document.getElementById('rSleep').textContent = existing.sleep_hours + 'h';
+  document.getElementById('rCycle').textContent = existing.cycle_day ? 'Day ' + existing.cycle_day : '—';
+  document.getElementById('insLoading').style.display = 'none';
+  document.getElementById('insTxt').textContent = existing.ai_insight || 'Come back tomorrow 🌸';
+  showInsightScreen({ alreadyLogged: true });
+}
 })();
 
-// ── Date label ──
-const now = new Date();
-document.getElementById('dateLabel').textContent =
-  now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+// Pain colors
+const painCols = ['#639922','#639922','#639922','#639922','#BA7517','#BA7517','#BA7517','#D4537E','#D4537E','#A32D2D','#A32D2D'];
+const engCols  = ['#A32D2D','#A32D2D','#D4537E','#BA7517','#BA7517','#BA7517','#1D9E75','#1D9E75','#1D9E75','#0F6E56','#0F6E56'];
 
-// ── Sliders ──
-function setSliderGradient(el, val) {
-  const pct = (val / 10) * 100;
-  el.style.background =
-    `linear-gradient(to right,#e8746a 0%,#e8746a ${pct}%,#f5cbc7 ${pct}%,#f5cbc7 100%)`;
-}
-
-const painSlider = document.getElementById('painSlider');
-const painVal    = document.getElementById('painVal');
-setSliderGradient(painSlider, 3);
-painSlider.addEventListener('input', function() {
-  state.pain_level = parseInt(this.value);
-  painVal.textContent = this.value;
-  setSliderGradient(this, this.value);
+document.getElementById('painR').addEventListener('input', function() {
+  st.pain = +this.value;
+  const el = document.getElementById('painV');
+  el.textContent = this.value;
+  el.style.color = painCols[+this.value];
+});
+document.getElementById('energyR').addEventListener('input', function() {
+  st.energy = +this.value;
+  const el = document.getElementById('energyV');
+  el.textContent = this.value;
+  el.style.color = engCols[+this.value];
 });
 
-const energySlider = document.getElementById('energySlider');
-const energyVal    = document.getElementById('energyVal');
-setSliderGradient(energySlider, 5);
-energySlider.addEventListener('input', function() {
-  state.energy_level = parseInt(this.value);
-  energyVal.textContent = this.value;
-  setSliderGradient(this, this.value);
-});
-
-// ── Mood ──
 document.getElementById('moodRow').addEventListener('click', function(e) {
-  const btn = e.target.closest('.mood-btn');
-  if (!btn) return;
-  state.mood = parseInt(btn.dataset.val);
-  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  const b = e.target.closest('.mbtn'); if (!b) return;
+  st.mood = +b.dataset.v;
+  document.querySelectorAll('.mbtn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
 });
 
-// ── Sleep stepper ──
-document.getElementById('sleepMinus').addEventListener('click', function() {
-  state.sleep_hours = Math.max(0, +(state.sleep_hours - 0.5).toFixed(1));
-  document.getElementById('sleepVal').textContent = state.sleep_hours.toFixed(1);
+let sl = 7.0;
+document.getElementById('sleepM').addEventListener('click', () => {
+  sl = Math.max(0, +(sl - 0.5).toFixed(1)); st.sleep = sl;
+  document.getElementById('sleepV').textContent = sl.toFixed(1);
 });
-document.getElementById('sleepPlus').addEventListener('click', function() {
-  state.sleep_hours = Math.min(24, +(state.sleep_hours + 0.5).toFixed(1));
-  document.getElementById('sleepVal').textContent = state.sleep_hours.toFixed(1);
+document.getElementById('sleepP').addEventListener('click', () => {
+  sl = Math.min(24, +(sl + 0.5).toFixed(1)); st.sleep = sl;
+  document.getElementById('sleepV').textContent = sl.toFixed(1);
 });
 
-// ── Cycle days ──
-const cycleScroll = document.getElementById('cycleScroll');
-for (let d = 1; d <= 35; d++) {
-  const btn = document.createElement('button');
-  btn.className = 'cycle-day';
-  btn.textContent = d;
-  btn.addEventListener('click', function() {
-    state.cycle_day = d;
-    document.querySelectorAll('.cycle-day').forEach(b => b.classList.remove('active'));
+const cs = document.getElementById('cycleScroll');
+for (let d = 1; d <= 28; d++) {
+  const b = document.createElement('button');
+  b.className = 'cday'; b.textContent = d;
+  b.addEventListener('click', function() {
+    st.cycleDay = d;
+    document.querySelectorAll('.cday').forEach(x => x.classList.remove('active'));
     this.classList.add('active');
   });
-  cycleScroll.appendChild(btn);
+  cs.appendChild(b);
 }
 
-// ── Chips ──
-const activeChips = new Set();
-document.getElementById('chipsContainer').addEventListener('click', function(e) {
-  const chip = e.target.closest('.chip');
-  if (!chip) return;
-  const key = chip.dataset.key;
-  if (key === 'none') {
-    activeChips.clear();
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+document.getElementById('chipsWrap').addEventListener('click', function(e) {
+  const c = e.target.closest('.chip'); if (!c) return;
+  const k = c.dataset.k;
+  if (k === 'none') {
+    st.chips.clear();
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active'); st.chips.add('none');
   } else {
-    activeChips.has(key) ? activeChips.delete(key) : activeChips.add(key);
-    chip.classList.toggle('active');
+    document.querySelector('[data-k="none"]').classList.remove('active');
+    st.chips.delete('none');
+    if (st.chips.has(k)) { st.chips.delete(k); c.classList.remove('active'); }
+    else { st.chips.add(k); c.classList.add('active'); }
   }
-  state.bloating  = activeChips.has('bloating');
-  state.headache  = activeChips.has('headache');
-  state.brain_fog = activeChips.has('brain_fog');
 });
 
-// ── Toast ──
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function updateProgress() {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('p' + i);
+    el.className = 'prog-step' + (i < step ? ' done' : i === step ? ' active' : '');
+  }
+  document.getElementById('pLbl').textContent = step + '/3';
+  document.getElementById('backBtn').style.display = step > 1 ? 'flex' : 'none';
+  const nb = document.getElementById('nextBtn');
+  if (step === 3) {
+    nb.innerHTML = 'Save my log <i class="ti ti-check"></i>';
+  } else {
+    nb.innerHTML = 'Continue <i class="ti ti-arrow-right"></i>';
+  }
 }
 
-// ── Fallback insight (used if the AI call fails or is rate-limited) ──
-function fallbackInsight() {
-  const pool = [
-    `With pain at ${state.pain_level}/10 today, your body is asking for some gentleness. ${state.sleep_hours < 6 ? 'Low sleep tends to amplify pain — even a short rest today could help.' : 'Your sleep gives your body a real foundation to work with.'} Keep logging daily — patterns become clearer within a couple of weeks.`,
-    `Energy at ${state.energy_level}/10 — ${state.energy_level >= 7 ? 'a stronger day. Notice what was different and try to repeat it.' : 'your body may be conserving. Protect your schedule and save demanding tasks for higher-energy days.'} Every log makes your insights sharper.`,
-    `Cycle day ${state.cycle_day || 'data incoming'} adds useful context to how you feel. Mood at ${state.mood}/10 tracked consistently over time can reveal patterns worth discussing with your doctor.`
-  ];
-  return pool[Math.floor(Math.random() * pool.length)];
+function goStep(s) {
+  document.getElementById('s' + step).classList.remove('active');
+  step = s;
+  document.getElementById('s' + step).classList.add('active');
+  updateProgress();
+  window.scrollTo(0, 0);
 }
 
-// ── Submit ──
-document.getElementById('submitBtn').addEventListener('click', async function() {
-  const btn = this;
-  const lbl = document.getElementById('submitLabel');
+document.getElementById('nextBtn').addEventListener('click', function() {
+  if (step < 3) { goStep(step + 1); }
+  else { saveLog(); }
+});
+document.getElementById('backBtn').addEventListener('click', function() {
+  if (step > 1) goStep(step - 1);
+});
+
+function showInsightScreen(opts = {}) {
+  document.getElementById('s' + step)?.classList.remove('active');
+  document.getElementById('progWrap').style.display = 'none';
+  document.getElementById('navBtns').style.display = 'none';
+  document.getElementById('insightScreen').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+async function saveLog() {
+  const btn = document.getElementById('nextBtn');
   btn.disabled = true;
-  lbl.innerHTML = 'Saving<span class="dots"><span></span><span></span><span></span></span>';
+  btn.innerHTML = 'Saving<span class="dots"><span></span><span></span><span></span></span>';
 
-  const notes = document.getElementById('notes').value;
+  const notes = document.getElementById('notesTA').value;
+  const today = now.toISOString().split('T')[0];
 
   try {
-    if (!currentUser) { window.location.href = '/'; return; }
-
-    // Save to Supabase — this is the part that must succeed
     const { data: log, error } = await sb.from('symptom_logs').insert({
-      user_id:      currentUser.id,
-      log_date:     new Date().toISOString().split('T')[0],
-      pain_level:   state.pain_level,
-      energy_level: state.energy_level,
-      mood:         state.mood,
-      sleep_hours:  state.sleep_hours,
-      cycle_day:    state.cycle_day,
-      bloating:     state.bloating,
-      headache:     state.headache,
-      brain_fog:    state.brain_fog,
+      user_id:      userId,
+      log_date:     today,
+      pain_level:   st.pain,
+      energy_level: st.energy,
+      mood:         st.mood,
+      sleep_hours:  st.sleep,
+      cycle_day:    st.cycleDay,
+      bloating:     st.chips.has('bloating'),
+      headache:     st.chips.has('headache'),
+      brain_fog:    st.chips.has('brain_fog'),
+      cramps:       st.chips.has('cramps'),
+      nausea:       st.chips.has('nausea'),
+      fatigue:      st.chips.has('fatigue'),
+      acne:         st.chips.has('acne'),
+      anxiety:      st.chips.has('anxiety'),
+      hot_flash:    st.chips.has('hot_flash'),
       notes
     }).select().single();
 
     if (error) throw error;
 
-    // The log is saved — confirm that now, independent of what happens with the insight below
-    btn.style.background = 'var(--sage)';
-    showToast('Log saved! ✓');
-    lbl.innerHTML = 'Getting insight<span class="dots"><span></span><span></span><span></span></span>';
+    // Show insight screen immediately
+    document.getElementById('rPain').textContent   = st.pain + '/10';
+    document.getElementById('rEnergy').textContent = st.energy + '/10';
+    document.getElementById('rSleep').textContent  = st.sleep.toFixed(1) + 'h';
+    document.getElementById('rCycle').textContent  = st.cycleDay ? 'Day ' + st.cycleDay : '—';
 
-    // Get AI insight — best-effort. A failure here must never make a successful save look like an error.
-    let insight = fallbackInsight();
-    try {
-      const symptomList = [...activeChips].join(', ') || 'none';
-      const prompt = `You are Flara, a warm companion for people managing PCOS and chronic illness.
+    const tr = document.getElementById('tagRow');
+    tr.innerHTML = '';
+    if (st.chips.size && !st.chips.has('none')) {
+      st.chips.forEach(k => {
+        const t = document.createElement('span');
+        t.className = 'itag';
+        t.textContent = k.replace('_', ' ');
+        tr.appendChild(t);
+      });
+    }
+
+    showInsightScreen();
+
+    // Get AI insight
+    const symptomList = [...st.chips].filter(k => k !== 'none').join(', ') || 'none';
+    const prompt = `You are Flara, a warm companion for people managing PCOS and chronic illness.
 Give ONE caring insight (2-3 sentences) based on today's log. Be warm and specific to the numbers. End with one gentle actionable tip.
 Never say "I". Never diagnose. Write in second person.
 
 Today's data:
-- Pain: ${state.pain_level}/10
-- Energy: ${state.energy_level}/10
-- Mood: ${state.mood}/10
-- Sleep: ${state.sleep_hours} hours
-- Cycle day: ${state.cycle_day || 'not logged'}
+- Pain: ${st.pain}/10
+- Energy: ${st.energy}/10
+- Mood: ${st.mood}/10
+- Sleep: ${st.sleep} hours
+- Cycle day: ${st.cycleDay || 'not logged'}
 - Symptoms: ${symptomList}
 - Notes: ${notes || 'none'}
 
 Respond with only the insight text. No labels, no formatting.`;
 
+    try {
       const res = await fetch('/api/insight', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })
       });
       const data = await res.json();
-      if (data.insight) insight = data.insight;
-      else console.warn('Insight API returned no insight, using fallback:', data);
-    } catch (insightErr) {
-      console.warn('AI insight request failed, using fallback:', insightErr);
+      if (!data.insight) {
+        console.warn('Using fallback insight —', data.error || `HTTP ${res.status}`, data.reason ? `(${data.reason})` : '');
+      }
+      const insight = data.insight || fallbackInsight();
+
+      document.getElementById('insLoading').style.display = 'none';
+      typeWrite(insight, document.getElementById('insTxt'));
+
+      // Save insight back to Supabase
+      await sb.from('symptom_logs').update({ ai_insight: insight }).eq('id', log.id);
+
+    } catch(e) {
+      console.error('Insight request failed entirely:', e);
+      document.getElementById('insLoading').style.display = 'none';
+      typeWrite(fallbackInsight(), document.getElementById('insTxt'));
     }
 
-    await sb.from('symptom_logs').update({ ai_insight: insight }).eq('id', log.id);
-
-    document.getElementById('insightText').textContent = insight;
-    const card = document.getElementById('insightCard');
-    card.classList.add('visible');
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    lbl.textContent = '✓ Saved';
-
-  } catch (err) {
+  } catch(err) {
     console.error(err);
-    lbl.textContent = "Save today's log";
     btn.disabled = false;
-    showToast('Something went wrong — try again');
+    btn.innerHTML = 'Save my log <i class="ti ti-check"></i>';
+    alert('Something went wrong — please try again.');
   }
-});
+}
+
+function fallbackInsight() {
+  const pool = [
+    `With pain at ${st.pain}/10 today, your body is asking for gentleness. ${st.sleep < 6 ? 'Low sleep amplifies pain signals — even a short rest this afternoon could help.' : 'Your sleep gives your body a real foundation for recovery.'} Keep logging — patterns across your cycle will reveal themselves within two weeks.`,
+    `Energy at ${st.energy}/10 — ${st.energy >= 7 ? 'a stronger day. Notice what was different and try to repeat it.' : 'your body is conserving. Protect your schedule and save demanding tasks for higher-energy days.'} Every log makes your insights sharper.`,
+    `Cycle day ${st.cycleDay || 'data incoming'} adds powerful context to how you feel. Mood at ${st.mood}/10 tracked consistently reveals the hormonal-emotional connection most doctors never explain.`
+  ];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function typeWrite(text, el) {
+  el.textContent = '';
+  let i = 0;
+  const t = setInterval(() => {
+    if (i < text.length) { el.textContent += text[i]; i++; }
+    else clearInterval(t);
+  }, 16);
+}
 </script>
 </body>
 </html>
