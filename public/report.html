@@ -184,8 +184,10 @@ function renderPreview() {
     <div class="stats-grid">
       <div class="stat rose"><div class="stat-num">${avg('pain_level')}</div><div class="stat-label">Avg pain (${currentLogs.length} days)</div></div>
       <div class="stat teal"><div class="stat-num">${avg('energy_level')}</div><div class="stat-label">Avg energy</div></div>
+      <div class="stat"><div class="stat-num">${avg('mood')}</div><div class="stat-label">Avg mood</div></div>
       <div class="stat"><div class="stat-num">${avg('sleep_hours')}h</div><div class="stat-label">Avg sleep</div></div>
       <div class="stat"><div class="stat-num">${worstDay.pain_level}/10</div><div class="stat-label">Worst pain day</div></div>
+      <div class="stat"><div class="stat-num">${currentLogs.length}</div><div class="stat-label">Days logged</div></div>
     </div>`;
   document.getElementById('genBtn').disabled = false;
 }
@@ -323,8 +325,10 @@ function generatePDF() {
       /* ============= EXECUTIVE SUMMARY ============= */
       const avgPainNum = currentLogs.reduce((s, l) => s + (l.pain_level || 0), 0) / currentLogs.length;
       const avgEnergyNum = currentLogs.reduce((s, l) => s + (l.energy_level || 0), 0) / currentLogs.length;
+      const avgMoodNum = currentLogs.reduce((s, l) => s + (l.mood || 0), 0) / currentLogs.length;
       const avgSleepNum = currentLogs.reduce((s, l) => s + (l.sleep_hours || 0), 0) / currentLogs.length;
       const worstDay = [...currentLogs].sort((a, b) => b.pain_level - a.pain_level)[0];
+      const periodDays = Math.round((new Date(endDate) - new Date(startDate)) / 86400000) + 1;
 
       let trendClause = 'held roughly steady across the period';
       if (currentLogs.length >= 6) {
@@ -337,7 +341,13 @@ function generatePDF() {
         else if (fAvg - sAvg >= 0.7) trendClause = 'trended downward through the period';
       }
 
-      const summaryText = `Over the ${currentLogs.length}-day period from ${startDate} to ${endDate}, pain averaged ${avgPainNum.toFixed(1)}/10 and ${trendClause}, while energy averaged ${avgEnergyNum.toFixed(1)}/10 on ${avgSleepNum.toFixed(1)} hours of sleep per night. The most difficult day was ${worstDay.log_date}, with pain reaching ${worstDay.pain_level}/10.`;
+      const summaryText = `Across ${startDate} to ${endDate} (${currentLogs.length} of ${periodDays} days logged), pain averaged ${avgPainNum.toFixed(1)}/10 and ${trendClause}, while energy averaged ${avgEnergyNum.toFixed(1)}/10 and mood averaged ${avgMoodNum.toFixed(1)}/10 on ${avgSleepNum.toFixed(1)} hours of sleep per night. The most difficult day was ${worstDay.log_date}, with pain reaching ${worstDay.pain_level}/10.`;
+
+      doc.setProperties({
+        title: `Flara Symptom Report — ${startDate} to ${endDate}`,
+        subject: 'Symptom tracking summary',
+        author: 'Flara'
+      });
 
       doc.setFont('times', 'italic');
       doc.setFontSize(10.5);
@@ -351,25 +361,26 @@ function generatePDF() {
       const avg = key => (currentLogs.reduce((s, l) => s + (l[key] || 0), 0) / currentLogs.length).toFixed(1);
       const statH = 28;
       const gap = 3;
-      const cardW = (contentW - gap * 3) / 4;
       const stats = [
         { label: 'AVG PAIN', val: avg('pain_level') + '/10', sub: `${currentLogs.length}-day average`, color: C.rose },
         { label: 'AVG ENERGY', val: avg('energy_level') + '/10', sub: 'higher is better', color: C.violet },
-        { label: 'AVG SLEEP', val: avg('sleep_hours') + 'h', sub: 'per night', color: C.blue },
+        { label: 'AVG MOOD', val: avg('mood') + '/10', sub: 'higher is better', color: C.blue },
+        { label: 'AVG SLEEP', val: avg('sleep_hours') + 'h', sub: 'per night', color: C.teal },
         { label: 'WORST PAIN', val: worstDay.pain_level + '/10', sub: worstDay.log_date, color: C.roseDeep },
       ];
+      const cardW = (contentW - gap * (stats.length - 1)) / stats.length;
       stats.forEach((s, i) => {
         const x = margin + i * (cardW + gap);
         setFill(C.white); setDraw(C.border);
         doc.roundedRect(x, y, cardW, statH, 2.2, 2.2, 'FD');
         setFill(s.color);
         doc.roundedRect(x, y, cardW, 1.6, 0.8, 0.8, 'F');
-        doc.setFontSize(6.8); setText(C.ink3);
-        doc.text(s.label, x + 4.5, y + 9);
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(16); setText(s.color);
-        doc.text(s.val, x + 4.5, y + 18.5);
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); setText(C.ink2);
-        doc.text(s.sub, x + 4.5, y + 24);
+        doc.setFontSize(6.5); setText(C.ink3);
+        doc.text(s.label, x + 3.8, y + 9);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(14); setText(s.color);
+        doc.text(s.val, x + 3.8, y + 18.5);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(6); setText(C.ink2);
+        doc.text(s.sub, x + 3.8, y + 24);
       });
       y += statH + 14;
 
@@ -521,7 +532,11 @@ function generatePDF() {
       y += symptomDefs.length * 9 + 10;
 
       /* ============= NOTES ============= */
-      const notedLogs = currentLogs.filter(l => l.notes && l.notes.trim()).slice(-4).reverse();
+      const notedLogs = currentLogs
+        .filter(l => l.notes && l.notes.trim())
+        .sort((a, b) => (b.pain_level || 0) - (a.pain_level || 0) || b.log_date.localeCompare(a.log_date))
+        .slice(0, 6)
+        .sort((a, b) => a.log_date.localeCompare(b.log_date));
       if (notedLogs.length) {
         ensureSpace(20);
         sectionTitle('Notes from your logs', C.teal);
@@ -551,11 +566,12 @@ function generatePDF() {
       // data values share the same centered anchor per column instead of both
       // being left-aligned at mismatched positions.
       const cols = [
-        { label: 'DATE', x: margin, w: 42, align: 'left' },
-        { label: 'PAIN', x: margin + 42, w: 26, align: 'center' },
-        { label: 'ENERGY', x: margin + 68, w: 30, align: 'center' },
-        { label: 'SLEEP', x: margin + 98, w: 28, align: 'center' },
-        { label: 'CYCLE DAY', x: margin + 126, w: 48, align: 'center' },
+        { label: 'DATE', x: margin, w: 38, align: 'left' },
+        { label: 'PAIN', x: margin + 38, w: 22, align: 'center' },
+        { label: 'ENERGY', x: margin + 60, w: 26, align: 'center' },
+        { label: 'MOOD', x: margin + 86, w: 22, align: 'center' },
+        { label: 'SLEEP', x: margin + 108, w: 24, align: 'center' },
+        { label: 'CYCLE DAY', x: margin + 132, w: 42, align: 'center' },
       ];
       function cellText(col, text, yPos) {
         if (col.align === 'center') {
@@ -587,8 +603,9 @@ function generatePDF() {
 
         setText([55, 46, 40]);
         cellText(cols[2], String(l.energy_level ?? '-'), y);
-        cellText(cols[3], l.sleep_hours ? l.sleep_hours + 'h' : '-', y);
-        cellText(cols[4], l.cycle_day ? 'Day ' + l.cycle_day : '-', y);
+        cellText(cols[3], String(l.mood ?? '-'), y);
+        cellText(cols[4], l.sleep_hours ? l.sleep_hours + 'h' : '-', y);
+        cellText(cols[5], l.cycle_day ? 'Day ' + l.cycle_day : '-', y);
         y += 7;
       });
 
@@ -604,7 +621,7 @@ function generatePDF() {
         doc.text(`page ${p} of ${pageCount}`, pageW - margin - 20, pageH - 10);
       }
 
-      doc.save(`flara-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`flara-report-${startDate}_to_${endDate}.pdf`);
 
       lbl.innerHTML = '<i class="ti ti-check"></i> Downloaded';
       setTimeout(() => {
