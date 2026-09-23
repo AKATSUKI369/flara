@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flara — Sign in</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -41,7 +44,7 @@
     animation: logoIn .6s cubic-bezier(.34,1.56,.64,1);
   }
   @keyframes logoIn { from { transform: scale(0) rotate(-10deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
-  .logomark svg { width: 28px; height: 28px; }
+  .logomark img { width: 28px; height: 28px; display: block; }
   .card {
     background: var(--white); border-radius: 24px; padding: 40px 36px;
     width: 100%; max-width: 400px;
@@ -105,10 +108,7 @@
   <div class="card">
     <div style="text-align:center;margin-bottom:24px">
       <div class="logomark">
-        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 4C14 4 8 9 8 15C8 18.314 10.686 21 14 21C17.314 21 20 18.314 20 15C20 9 14 4 14 4Z" fill="white" fill-opacity=".9"/>
-          <path d="M14 21C14 21 14 24 14 25" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+        <img src="/assets/flara-mark-white.png" alt="">
       </div>
       <div class="logo-text">flara</div>
       <div class="tagline">Your body has patterns.<br><em>Flara helps you find them.</em></div>

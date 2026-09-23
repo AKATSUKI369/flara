@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flara — Track your PCOS, find your patterns</title>
 <meta name="description" content="Flara helps women with PCOS, endometriosis and fibromyalgia track symptoms, find triggers, and generate doctor reports. Free to start.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -23,7 +26,8 @@
 
   /* Nav */
   nav { padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: rgba(250,247,244,.92); backdrop-filter: blur(12px); z-index: 100; border-bottom: 0.5px solid rgba(212,83,126,.08); }
-  .nav-logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 300; color: var(--p); letter-spacing: -.3px; }
+  .nav-logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 300; color: var(--p); letter-spacing: -.3px; display: flex; align-items: center; gap: 8px; }
+  .nav-logo .logo-icon { height: 1.1em; width: auto; display: block; }
   .nav-cta { padding: 9px 20px; background: var(--p); color: #fff; border: none; border-radius: 99px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; text-decoration: none; }
   .nav-cta:hover { opacity: .88; }
 
@@ -263,7 +267,7 @@
 <body>
 
 <nav>
-  <div class="nav-logo">flara</div>
+  <div class="nav-logo"><img class="logo-icon" src="/assets/flara-mark.png" alt="">flara</div>
   <a href="/app" class="nav-cta">Get started free →</a>
 </nav>
 
