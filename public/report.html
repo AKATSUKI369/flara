@@ -198,11 +198,38 @@ function renderPreview() {
 
 document.getElementById('genBtn').addEventListener('click', generatePDF);
 
-function generatePDF() {
+// Fetches a same-origin image and returns it as a PNG data URL for jsPDF's addImage.
+function loadImageAsDataURL(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      try { resolve(canvas.toDataURL('image/png')); }
+      catch (e) { reject(e); }
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+async function generatePDF() {
   const btn = document.getElementById('genBtn');
   const lbl = document.getElementById('genBtnLabel');
   btn.disabled = true;
   lbl.innerHTML = 'Generating<span class="dots"><span></span><span></span><span></span></span>';
+
+  // Load the white mark ahead of jsPDF's synchronous drawing pass below — if it 404s
+  // or fails to rasterize, the report still generates fine with a text-only header.
+  let markDataUrl = null;
+  try {
+    markDataUrl = await loadImageAsDataURL('/assets/flara-mark-white.png');
+  } catch (e) {
+    console.warn('Logo mark failed to load for PDF header, continuing without it', e);
+  }
 
   setTimeout(() => {
     try {
@@ -242,8 +269,9 @@ function generatePDF() {
         }
       }
 
-      /* wordmark: serif, non-italic (matches site's Fraunces logo — text only, no icon,
-         consistent with dashboard/log/trends/community/profile which never show the icon mark) */
+      /* wordmark: serif, non-italic (Times approximates the site's Fraunces logo font,
+         which jsPDF can't load directly). Used alone in brandStrip() on overflow pages;
+         paired with the flara-mark icon in the main header below. */
       function wordmark(x, baseline, size, color) {
         doc.setFont('times', 'normal');
         doc.setFontSize(size);
@@ -284,12 +312,23 @@ function generatePDF() {
       setFill(C.rose);
       doc.rect(0, headerH, pageW, 0.9, 'F');
 
-      wordmark(margin, 21, 26, C.white);
+      let brandX = margin;
+      if (markDataUrl) {
+        const markSize = 12;
+        try {
+          doc.addImage(markDataUrl, 'PNG', margin, 13, markSize, markSize);
+          brandX = margin + markSize + 6;
+        } catch (e) {
+          console.warn('addImage failed, falling back to text-only header', e);
+        }
+      }
+
+      wordmark(brandX, 21, 26, C.white);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       setText([232, 205, 214]);
-      doc.text('S Y M P T O M   T R A C K I N G   R E P O R T', margin, 30);
+      doc.text('S Y M P T O M   T R A C K I N G   R E P O R T', brandX, 30);
 
       doc.setFontSize(7.5);
       setText([232, 205, 214]);
